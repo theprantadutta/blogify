@@ -31,10 +31,9 @@ export default handler.post(async (req, res) => {
       return res.status(200).json(user)
     }
 
-    res.json({
+    return res.status(422).json({
       error: "Password Didn't match",
     })
-    return res.status(422).end()
   } catch (e) {
     return res.status(422).json({
       error: e.message,

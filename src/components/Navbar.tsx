@@ -2,14 +2,14 @@ import { Box, Flex, Heading, Spacer } from '@chakra-ui/react'
 import axios from 'axios'
 import Link from 'next/link'
 import React from 'react'
-import { useRecoilValue } from 'recoil'
+import { useRecoilState } from 'recoil'
 import { authAtom } from '../state/authState'
 import PrimaryButton from './PrimaryButton'
 
 interface NavbarProps {}
 
 const Navbar: React.FC<NavbarProps> = ({}) => {
-  const auth = useRecoilValue(authAtom)
+  const [auth, setAuth] = useRecoilState(authAtom)
   return (
     <Flex alignItems="center">
       <Box>
@@ -28,6 +28,7 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
             <PrimaryButton
               onClick={async () => {
                 await axios.post('/api/logout')
+                setAuth(null)
               }}
             >
               Logout
