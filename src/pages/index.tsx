@@ -1,56 +1,52 @@
-import {
-  Link as ChakraLink,
-  Text,
-  Code,
-  List,
-  ListIcon,
-  ListItem,
-} from '@chakra-ui/react'
-import { CheckCircleIcon, LinkIcon } from '@chakra-ui/icons'
+import { Box, Heading, Text } from '@chakra-ui/react'
+import { NextPageContext } from 'next'
+import { withIronSession } from 'next-iron-session'
+import Link from 'next/link'
+import React from 'react'
+import { useRecoilValue } from 'recoil'
+import Layout from '../components/Layout'
+import { cookieOptions } from '../handler'
+import { authAtom } from '../state/authState'
+import { ModifiedUser } from '../util/types'
 
-import { Hero } from '../components/Hero'
-import { Container } from '../components/Container'
-import { Main } from '../components/Main'
-import { DarkModeSwitch } from '../components/DarkModeSwitch'
-import { CTA } from '../components/CTA'
-import { Footer } from '../components/Footer'
+interface indexProps {
+  user: ModifiedUser
+}
 
-const Index = () => (
-  <Container height="100vh">
-    <Hero />
-    <Main>
-      <Text>
-        Example repository of <Code>Next.js</Code> + <Code>chakra-ui</Code> +{' '}
-        <Code>typescript</Code>.
-      </Text>
+const index: React.FC<indexProps> = ({user}) => {
+  const auth = useRecoilValue(authAtom)
+  console.log(auth)
+  return (
+    <Layout user={user}>
+      <Box margin="4">
+        {auth ? (
+          <p>Show Posts Here</p>
+        ) : (
+          <Heading as="h4" fontSize="lg">
+            Please{' '}
+            <Link href="/login">
+              <Text as="span" color="purple.700">
+                Log In
+              </Text>
+            </Link>{' '}
+            to view Posts
+          </Heading>
+        )}
+      </Box>
+    </Layout>
+  )
+}
 
-      <List spacing={3} my={0}>
-        <ListItem>
-          <ListIcon as={CheckCircleIcon} color="green.500" />
-          <ChakraLink
-            isExternal
-            href="https://chakra-ui.com"
-            flexGrow={1}
-            mr={2}
-          >
-            Chakra UI <LinkIcon />
-          </ChakraLink>
-        </ListItem>
-        <ListItem>
-          <ListIcon as={CheckCircleIcon} color="green.500" />
-          <ChakraLink isExternal href="https://nextjs.org" flexGrow={1} mr={2}>
-            Next.js <LinkIcon />
-          </ChakraLink>
-        </ListItem>
-      </List>
-    </Main>
-
-    <DarkModeSwitch />
-    <Footer>
-      <Text>Next ❤️ Chakra</Text>
-    </Footer>
-    <CTA />
-  </Container>
+export const getServerSideProps = withIronSession(
+  async ({ req }: NextPageContext) => {
+    const user = (req as any).session.get('user')
+    if (!user) {
+      return { props: {} }
+    }
+    return {
+      props: { user },
+    }
+  },
+  cookieOptions
 )
-
-export default Index
+export default index
