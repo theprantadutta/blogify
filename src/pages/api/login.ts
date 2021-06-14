@@ -1,8 +1,9 @@
 import { compareSync } from 'bcrypt'
-import handler from '../../handler'
+import { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '../../lib/prisma'
+import redis, { REDIS_LOGIN_KEY, TTL } from '../../util/redis'
 
-export default handler.post(async (req, res) => {
+export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { email, password } = req.body
 
   if (!email || !password) {
@@ -26,8 +27,7 @@ export default handler.post(async (req, res) => {
 
     if (compareSync(password, user.password)) {
       delete user.password
-      req.session.set('user', user)
-      await req.session.save()
+      await redis.set(REDIS_LOGIN_KEY, user.id, 'EX', TTL)
       return res.status(200).json(user)
     }
 
@@ -39,4 +39,4 @@ export default handler.post(async (req, res) => {
       error: e.message,
     })
   }
-})
+}

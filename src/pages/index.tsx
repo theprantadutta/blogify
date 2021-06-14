@@ -1,31 +1,31 @@
 import { Box, Heading, Text } from '@chakra-ui/react'
-import { NextPageContext } from 'next'
-import { withIronSession } from 'next-iron-session'
+import axios from 'axios'
+import isEmpty from 'lodash/isEmpty'
+import { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import React from 'react'
 import { useRecoilValue } from 'recoil'
 import Layout from '../components/Layout'
-import { cookieOptions } from '../handler'
 import { authAtom } from '../state/authState'
+import { API_URL, IS_PRODUCTION } from '../util/constants'
 import { ModifiedUser } from '../util/types'
 
 interface indexProps {
-  user: ModifiedUser
+  user: ModifiedUser | null
 }
 
-const index: React.FC<indexProps> = ({user}) => {
+const index: React.FC<indexProps> = ({ user }) => {
   const auth = useRecoilValue(authAtom)
-  console.log(auth)
   return (
     <Layout user={user}>
-      <Box margin="4">
+      <Box marginY="4">
         {auth ? (
-          <p>Show Posts Here</p>
+          <p>You can now see all the posts</p>
         ) : (
           <Heading as="h4" fontSize="lg">
             Please{' '}
             <Link href="/login">
-              <Text as="span" color="purple.700">
+              <Text as="span" color="purple.700" cursor="pointer">
                 Log In
               </Text>
             </Link>{' '}
@@ -37,16 +37,28 @@ const index: React.FC<indexProps> = ({user}) => {
   )
 }
 
-export const getServerSideProps = withIronSession(
-  async ({ req }: NextPageContext) => {
-    const user = (req as any).session.get('user')
-    if (!user) {
-      return { props: {} }
+export const getServerSideProps: GetServerSideProps = async () => {
+  try {
+    let { data: user } = await axios.get(API_URL + '/user')
+    if (!isEmpty(user)) {
+      return { props: { user } }
+    }
+  } catch (e) {
+    if (IS_PRODUCTION) {
+      console.log('user not authenticated', e.message)
     }
     return {
-      props: { user },
+      redirect: {
+        permanent: false,
+        destination: '/login',
+      },
+      props: {},
     }
-  },
-  cookieOptions
-)
+  }
+
+  return {
+    props: {},
+  }
+}
+
 export default index

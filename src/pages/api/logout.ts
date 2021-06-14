@@ -1,8 +1,7 @@
-import handler from '../../handler'
+import { NextApiRequest, NextApiResponse } from 'next'
+import redis, { REDIS_LOGIN_KEY } from '../../util/redis'
 
-export default handler.post((req, res) => {
-  req.session.destroy()
-  res.status(200).json({
-    ok: 'OK',
-  })
-})
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  await redis.del(REDIS_LOGIN_KEY)
+  return res.status(200).end()
+}

@@ -9,22 +9,23 @@ import {
   InputGroup,
   InputRightElement,
   Spacer,
+  useToast,
 } from '@chakra-ui/react'
 import axios from 'axios'
-import { NextPageContext } from 'next'
-import { withIronSession } from 'next-iron-session'
+import isEmpty from 'lodash/isEmpty'
+import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
 import React, { ChangeEvent, useState } from 'react'
 import { useSetRecoilState } from 'recoil'
 import Layout from '../components/Layout'
 import PrimaryButton from '../components/PrimaryButton'
-import { cookieOptions } from '../handler'
 import { authAtom } from '../state/authState'
+import { API_URL } from '../util/constants'
 import { ModifiedUser } from '../util/types'
 
 interface loginProps {
-  user: ModifiedUser
+  user: ModifiedUser | null
 }
 
 type LoginForm = {
@@ -33,9 +34,10 @@ type LoginForm = {
 }
 
 const login: React.FC<loginProps> = ({ user }) => {
+  const router = useRouter()
+  const toast = useToast()
   const [show, setShow] = useState(false)
   const setAuth = useSetRecoilState(authAtom)
-  const router = useRouter()
   const [form, setForm] = useState<LoginForm>({ email: '', password: '' })
   const [error, setError] = useState<string | null>('')
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,8 +45,14 @@ const login: React.FC<loginProps> = ({ user }) => {
     try {
       const { data } = await axios.post('/api/login', form)
       console.log('data: ', data)
-      setAuth(data.user)
+      setAuth(data)
       setError(null)
+      toast({
+        title: `Welcome, ${data.name}`,
+        status: 'success',
+        isClosable: true,
+        position: 'top-right',
+      })
       return router.push('/')
     } catch (e) {
       setError(e.response.data.error)
@@ -111,21 +119,25 @@ const login: React.FC<loginProps> = ({ user }) => {
   )
 }
 
-export const getServerSideProps = withIronSession(
-  async ({ req }: NextPageContext) => {
-    const user = (req as any).session.get('user')
-    if (!user) {
-      return { props: {} }
+export const getServerSideProps: GetServerSideProps = async () => {
+  try {
+    const { data: user } = await axios.get(API_URL + '/user')
+    if (!isEmpty(user)) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: '/',
+        },
+        props: {},
+      }
     }
-    return {
-      redirect: {
-        permanent: false,
-        destination: '/',
-      },
-      props: {},
-    }
-  },
-  cookieOptions
-)
+  } catch (e) {
+    console.log('user not authenticated', e.message)
+  }
+
+  return {
+    props: {},
+  }
+}
 
 export default login

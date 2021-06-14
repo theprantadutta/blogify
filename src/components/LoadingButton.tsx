@@ -1,19 +1,22 @@
-import { Button, ButtonOptions } from '@chakra-ui/react'
+import { Button, ButtonProps } from '@chakra-ui/react'
 
-interface ButtonProps {
-  loadingText: string
-  buttonProps?: ButtonOptions
+interface LoadingButtonProps extends ButtonProps {
+  loadingText?: string
 }
 
-const LoadingButton: React.FC<ButtonProps> = ({ loadingText, buttonProps }) => {
+const LoadingButton: React.FC<LoadingButtonProps> = ({
+  loadingText = 'Loading',
+  ...props
+}) => {
   return (
     <Button
-      {...buttonProps}
-      marginX="2"
-      bgColor="purple.500"
+      {...props}
+      my="2"
+      w="full"
+      bgColor="purple.700"
       textColor="white"
-      _hover={{ bgColor: 'purple.700' }}
       isLoading
+      _focus={{ bgColor: 'purple.900' }}
       loadingText={loadingText}
     />
   )

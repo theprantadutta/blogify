@@ -3,3 +3,8 @@ export type ModifiedUser = {
   name: string
   email: string
 }
+
+export type NavButtonLinks = {
+  title: string
+  link: string
+}

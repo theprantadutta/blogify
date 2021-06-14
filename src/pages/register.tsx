@@ -11,20 +11,20 @@ import {
   Spacer,
 } from '@chakra-ui/react'
 import axios from 'axios'
-import { NextPageContext } from 'next'
-import { withIronSession } from 'next-iron-session'
+import isEmpty from 'lodash/isEmpty'
+import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
 import React, { ChangeEvent, useState } from 'react'
 import { useSetRecoilState } from 'recoil'
 import Layout from '../components/Layout'
 import PrimaryButton from '../components/PrimaryButton'
-import { cookieOptions } from '../handler'
 import { authAtom } from '../state/authState'
+import { API_URL } from '../util/constants'
 import { ModifiedUser } from '../util/types'
 
 interface registerProps {
-  user: ModifiedUser
+  user: ModifiedUser | null
 }
 
 type RegisterForm = {
@@ -48,7 +48,7 @@ const register: React.FC<registerProps> = ({ user }) => {
     console.log(form)
     try {
       const { data } = await axios.post('/api/register', form)
-      setAuth(data.user)
+      setAuth(data)
       setError(null)
       return router.push('/')
     } catch (e) {
@@ -128,21 +128,25 @@ const register: React.FC<registerProps> = ({ user }) => {
   )
 }
 
-export const getServerSideProps = withIronSession(
-  async ({ req }: NextPageContext) => {
-    const user = (req as any).session.get('user')
-    if (!user) {
-      return { props: {} }
+export const getServerSideProps: GetServerSideProps = async () => {
+  try {
+    const { data: user } = await axios.get(API_URL + '/user')
+    if (!isEmpty(user)) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: '/',
+        },
+        props: {},
+      }
     }
-    return {
-      redirect: {
-        permanent: false,
-        destination: '/',
-      },
-      props: {},
-    }
-  },
-  cookieOptions
-)
+  } catch (e) {
+    console.log('user not authenticated', e.message)
+  }
+
+  return {
+    props: {},
+  }
+}
 
 export default register

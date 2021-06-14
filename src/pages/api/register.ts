@@ -1,8 +1,9 @@
 import { hashSync } from 'bcrypt'
-import handler from '../../handler'
+import { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '../../lib/prisma'
+import redis, { REDIS_LOGIN_KEY } from '../../util/redis'
 
-export default handler.post(async (req, res) => {
+export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { name, email, password } = req.body
 
   if (!name || !email || !password) {
@@ -23,12 +24,12 @@ export default handler.post(async (req, res) => {
     })
 
     delete user.password
-    req.session.set('user', user)
-    await req.session.save()
-    return res.status(201).json(user)
+    delete user.password
+    await redis.set(REDIS_LOGIN_KEY, user.id)
+    return res.status(200).json(user)
   } catch (e) {
     return res.status(422).json({
       error: e.message,
     })
   }
-})
+}
