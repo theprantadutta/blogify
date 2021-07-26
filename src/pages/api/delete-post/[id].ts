@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '../../../lib/prisma'
-import redis, { REDIS_LOGIN_KEY } from '../../../util/redis'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const id = parseInt(req.query.id as any)
@@ -10,8 +9,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       error: 'Please Provide a PostID',
     })
   }
-
-  const userId = await redis.get(REDIS_LOGIN_KEY)
 
   try {
     const post = await prisma.post.delete({

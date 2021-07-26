@@ -23,8 +23,9 @@ const index: React.FC<indexProps> = ({ user, data }) => {
 export const getServerSideProps: GetServerSideProps = async () => {
   try {
     let { data: user } = await axios.get(API_URL + '/user')
+    const { data } = await axios.post(API_URL + `/get-all-posts`, { page: 1 })
     if (!isEmpty(user)) {
-      return { props: { user } }
+      return { props: { user, data } }
     }
   } catch (e) {
     console.log('user not authenticated', e.message)

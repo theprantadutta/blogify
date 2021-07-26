@@ -7,7 +7,7 @@ import React from 'react'
 import { useRecoilValue } from 'recoil'
 import Layout from '../components/Layout'
 import { authAtom } from '../state/authState'
-import { API_URL, IS_PRODUCTION } from '../util/constants'
+import { API_URL, FEATURES, IS_PRODUCTION } from '../util/constants'
 import { ModifiedUser } from '../util/types'
 
 interface indexProps {
@@ -20,7 +20,9 @@ const index: React.FC<indexProps> = ({ user }) => {
     <Layout user={user}>
       <Box marginY="4">
         {auth ? (
-          <p>You can now see all the posts</p>
+          <Text as="span" color="purple.700" cursor="pointer">
+            You can now see all the posts
+          </Text>
         ) : (
           <Heading as="h4" fontSize="lg">
             Please{' '}
@@ -33,6 +35,17 @@ const index: React.FC<indexProps> = ({ user }) => {
           </Heading>
         )}
       </Box>
+      <Text fontWeight="semibold" fontSize="xl">
+        Project Features
+      </Text>
+
+      {FEATURES.map((feature) => (
+        <Box key={feature} my="2">
+          <Text fontWeight="semibold" color="purple.500">
+            ✅ {feature}
+          </Text>
+        </Box>
+      ))}
     </Layout>
   )
 }

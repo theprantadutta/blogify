@@ -118,6 +118,10 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
     }
   )
 
+  // to delete the post, as we are using modal,
+  // we need another state to control deletable id
+  const [postId, setPostId] = useState(0)
+
   return (
     <Box my="5">
       <Flex alignItems="center">
@@ -175,39 +179,11 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
                       aria-label="Call Sage"
                       fontSize="20px"
                       icon={<DeleteIcon />}
-                      onClick={onOpen}
+                      onClick={() => {
+                        setPostId(post.id)
+                        onOpen()
+                      }}
                     />
-                    <Modal
-                      closeOnOverlayClick={false}
-                      isOpen={isOpen}
-                      onClose={onClose}
-                    >
-                      <ModalOverlay />
-                      <ModalContent>
-                        <ModalHeader fontSize="2xl" fontWeight="bold">
-                          Delete A Post
-                        </ModalHeader>
-                        <ModalCloseButton />
-                        <ModalBody fontSize="xl" fontWeight="bold" pb={6}>
-                          You are Deleting a Post. Are You Sure?
-                        </ModalBody>
-
-                        <ModalFooter>
-                          <PrimaryButton
-                            onClick={() => {
-                              deletePostMutation.mutate(post.id)
-                              onClose()
-                            }}
-                            mr={3}
-                          >
-                            Go Ahead
-                          </PrimaryButton>
-                          <PrimaryButton onClick={onClose}>
-                            Not Sure
-                          </PrimaryButton>
-                        </ModalFooter>
-                      </ModalContent>
-                    </Modal>
                   </>
                 )}
               </Flex>
@@ -217,6 +193,32 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
             </Box>
           )
         })}
+
+      <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader fontSize="2xl" fontWeight="bold">
+            Delete A Post
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody fontSize="xl" fontWeight="bold" pb={6}>
+            You are Deleting a Post. Are You Sure?
+          </ModalBody>
+
+          <ModalFooter>
+            <PrimaryButton
+              onClick={() => {
+                deletePostMutation.mutate(postId)
+                onClose()
+              }}
+              mr={3}
+            >
+              Go Ahead
+            </PrimaryButton>
+            <PrimaryButton onClick={onClose}>Not Sure</PrimaryButton>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       {data?.posts.length === 0 && (
         <Box my="2">
           <Text as="p" fontSize="xl" fontWeight="semibold" my="5">
