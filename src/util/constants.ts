@@ -1,7 +1,9 @@
 import { SessionOptions } from 'next-iron-session'
 
-export const API_URL = 'http://localhost:3000/api'
 export const IS_PRODUCTION = process.env.NODE_ENV
+export const API_URL = IS_PRODUCTION
+  ? 'https://new-blogify.vercel.app'
+  : 'http://localhost:3000/api'
 
 export const FEATURES = [
   'User Authentication',
@@ -16,5 +18,8 @@ export const NEXT_IRON_SESSION_CONFIG: SessionOptions = {
   // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
     secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    httpOnly: true,
+    path: '/',
   },
 }

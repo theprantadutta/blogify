@@ -1,5 +1,7 @@
 > This is one of my projects. This is still in development. I will add more and more features in the future.
 
+> [OPEN LIVE PREVIEW](https://new-blogify.vercel.app)
+
 ### Project Features
 
 - ✅ User Authentication
