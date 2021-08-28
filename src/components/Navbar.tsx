@@ -59,6 +59,7 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
                   size="md"
                   variant="outline"
                   icon={<Icon as={FaUserCircle} />}
+                  colorScheme="purple"
                 />
               </PopoverTrigger>
               <PopoverContent textAlign="right" _focus={{ ring: 0 }}>

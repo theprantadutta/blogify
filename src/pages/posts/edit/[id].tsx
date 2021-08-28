@@ -1,57 +1,44 @@
-import { Post } from '@prisma/client'
-import axios from 'axios'
-import isEmpty from 'lodash/isEmpty'
 import { GetServerSideProps } from 'next'
 import React from 'react'
 import Layout from '../../../components/Layout'
+import LoadingButton from '../../../components/LoadingButton'
 import PostForm from '../../../components/PostForm'
-import { API_URL } from '../../../util/constants'
+import withAuth from '../../../HOCs/withAuth'
 import { ModifiedUser } from '../../../util/types'
+import { useGetSinglePost } from '../[id]'
 
 interface EditPostProps {
   user: ModifiedUser | null
-  post: Post
+  postId: string
 }
 
-const EditPost: React.FC<EditPostProps> = ({ user, post }) => {
+const EditPost: React.FC<EditPostProps> = ({ user, postId }) => {
+  const { data: postData, status } = useGetSinglePost(postId)
   return (
     <Layout user={user}>
-      {!post && <p>Post Not Found</p>}
+      {status === 'loading' && <LoadingButton />}
 
-      {post && (
+      {status === 'error' && <p>Post Not Found</p>}
+
+      {postData && (
         <PostForm
           operation="update"
           pageTitle={`Update Post`}
           buttonName="Update Post"
-          post={post}
+          post={postData}
         />
       )}
     </Layout>
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  try {
-    let { data: user } = await axios.get(API_URL + '/user')
+export const getServerSideProps: GetServerSideProps = withAuth(
+  async (context) => {
+    const { user } = context
+    const postId = context.query.id
 
-    const postId = query.id
-
-    const { data } = await axios.get(API_URL + '/get-single-post/' + postId)
-
-    if (!isEmpty(user)) {
-      return { props: { user, postId, post: data } }
-    }
-  } catch (e) {
-    console.log('user not authenticated', e.message)
+    return { props: { user, postId } }
   }
-
-  return {
-    redirect: {
-      permanent: false,
-      destination: '/login',
-    },
-    props: {},
-  }
-}
+)
 
 export default EditPost

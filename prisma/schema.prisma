@@ -2,8 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 generator client {
@@ -12,17 +12,17 @@ generator client {
 
 model User {
   id       Int    @id @default(autoincrement())
-  name     String @db.VarChar(255)
-  email    String @unique @db.VarChar(255)
-  password String @db.VarChar(255)
+  name     String
+  email    String @unique
+  password String
   Post     Post[]
 }
 
 model Post {
   id        Int      @id @default(autoincrement())
-  title     String   @db.VarChar(255)
-  content   String   @db.LongText
-  createdAt DateTime @default(now()) @db.Timestamp(6)
+  title     String
+  content   String
+  createdAt DateTime @default(now())
   userId    Int
   User      User     @relation(fields: [userId], references: [id])
 }

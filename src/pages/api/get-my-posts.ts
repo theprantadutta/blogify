@@ -1,49 +1,55 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiResponse } from 'next'
+import { withIronSession } from 'next-iron-session'
 import prisma from '../../lib/prisma'
-import redis, { REDIS_LOGIN_KEY } from '../../util/redis'
+import { NEXT_IRON_SESSION_CONFIG } from '../../util/constants'
+import { ExtendedApiRequest, ModifiedUser } from '../../util/types'
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  let { page } = req.body
+export default withIronSession(
+  async (req: ExtendedApiRequest, res: NextApiResponse) => {
+    const user: ModifiedUser = req.session.get('user')
 
-  if (!page) {
-    return res.status(422).json({
-      error: 'Please Provide Page Information',
-    })
-  }
+    if (!user) {
+      return res.status(419).json({
+        error: 'You are not authenticated',
+      })
+    }
+    let { page } = req.body
 
-  page = parseInt(page)
-  const take = 3
-  let skip = (page - 1) * take
+    if (!page) {
+      return res.status(422).json({
+        error: 'Please Provide Page Information',
+      })
+    }
 
-  const userId = await redis.get(REDIS_LOGIN_KEY)
+    page = parseInt(page)
+    const take = 3
+    let skip = (page - 1) * take
 
-  if (!userId) {
-    return res.status(419).json({
-      error: 'You are not authenticated',
-    })
-  }
+    const userId = user.id
 
-  try {
-    const posts = await prisma.post.findMany({
-      take,
-      skip,
-      where: {
-        userId: parseInt(userId),
-      },
-    })
+    try {
+      const posts = await prisma.post.findMany({
+        take,
+        skip,
+        where: {
+          userId,
+        },
+      })
 
-    let postCount = await prisma.post.count({
-      where: {
-        userId: parseInt(userId),
-      },
-    })
+      let postCount = await prisma.post.count({
+        where: {
+          userId,
+        },
+      })
 
-    return res
-      .status(200)
-      .json({ posts, isNextPage: postCount - (skip + take) > 0 })
-  } catch (e) {
-    return res.status(422).json({
-      error: 'Something Went Wrong',
-    })
-  }
-}
+      return res
+        .status(200)
+        .json({ posts, isNextPage: postCount - (skip + take) > 0 })
+    } catch (e) {
+      return res.status(422).json({
+        error: 'Something Went Wrong',
+      })
+    }
+  },
+  NEXT_IRON_SESSION_CONFIG
+)

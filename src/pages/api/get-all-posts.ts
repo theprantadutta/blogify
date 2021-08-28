@@ -1,35 +1,49 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiResponse } from 'next'
+import { withIronSession } from 'next-iron-session'
 import prisma from '../../lib/prisma'
+import { NEXT_IRON_SESSION_CONFIG } from '../../util/constants'
+import { ExtendedApiRequest } from '../../util/types'
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  let { page } = req.body
+export default withIronSession(
+  async (req: ExtendedApiRequest, res: NextApiResponse) => {
+    const user = req.session.get('user')
 
-  if (!page) {
-    return res.status(422).json({
-      error: 'Please Provide Page Information',
-    })
-  }
+    if (!user) {
+      return res.status(419).json({
+        error: 'You are not authenticated',
+      })
+    }
 
-  page = parseInt(page)
-  const take = 3
-  let skip = (page - 1) * take
+    let { page } = req.body
 
-  try {
-    const posts = await prisma.post.findMany({
-      take,
-      skip,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
-    let postCount = await prisma.post.count()
+    if (!page) {
+      return res.status(422).json({
+        error: 'Please Provide Page Information',
+      })
+    }
 
-    return res
-      .status(200)
-      .json({ posts, isNextPage: postCount - (skip + take) > 0 })
-  } catch (e) {
-    return res.status(422).json({
-      error: 'Something Went Wrong',
-    })
-  }
-}
+    page = parseInt(page)
+    const take = 3
+    let skip = (page - 1) * take
+
+    try {
+      const posts = await prisma.post.findMany({
+        take,
+        skip,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+      let postCount = await prisma.post.count()
+
+      return res
+        .status(200)
+        .json({ posts, isNextPage: postCount - (skip + take) > 0 })
+    } catch (e) {
+      return res.status(422).json({
+        error: 'Something Went Wrong',
+      })
+    }
+  },
+  NEXT_IRON_SESSION_CONFIG
+)

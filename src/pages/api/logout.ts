@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import redis, { REDIS_LOGIN_KEY } from '../../util/redis'
+import { withIronSession } from 'next-iron-session'
+import { NEXT_IRON_SESSION_CONFIG } from '../../util/constants'
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  await redis.del(REDIS_LOGIN_KEY)
+export default withIronSession((req, res) => {
+  req.session.destroy()
   return res.status(200).end()
-}
+}, NEXT_IRON_SESSION_CONFIG)

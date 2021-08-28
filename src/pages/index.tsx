@@ -1,13 +1,12 @@
 import { Box, Heading, Text } from '@chakra-ui/react'
-import axios from 'axios'
-import isEmpty from 'lodash/isEmpty'
 import { GetServerSideProps } from 'next'
+import { withIronSession } from 'next-iron-session'
 import Link from 'next/link'
 import React from 'react'
 import { useRecoilValue } from 'recoil'
 import Layout from '../components/Layout'
 import { authAtom } from '../state/authState'
-import { API_URL, FEATURES, IS_PRODUCTION } from '../util/constants'
+import { FEATURES, NEXT_IRON_SESSION_CONFIG } from '../util/constants'
 import { ModifiedUser } from '../util/types'
 
 interface indexProps {
@@ -20,9 +19,15 @@ const index: React.FC<indexProps> = ({ user }) => {
     <Layout user={user}>
       <Box marginY="4">
         {auth ? (
-          <Text as="span" color="purple.700" cursor="pointer">
-            You can now see all the posts
-          </Text>
+          <Heading as="h4" fontSize="lg">
+            You can now see all the
+            <Link href="/posts">
+              <Text as="span" color="purple.700" cursor="pointer">
+                {' '}
+                Posts
+              </Text>
+            </Link>
+          </Heading>
         ) : (
           <Heading as="h4" fontSize="lg">
             Please{' '}
@@ -50,28 +55,17 @@ const index: React.FC<indexProps> = ({ user }) => {
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  try {
-    let { data: user } = await axios.get(API_URL + '/user')
-    if (!isEmpty(user)) {
-      return { props: { user } }
-    }
-  } catch (e) {
-    if (IS_PRODUCTION) {
-      console.log('user not authenticated', e.message)
+export const getServerSideProps: GetServerSideProps = withIronSession(
+  async ({ req }) => {
+    const user = req.session.get('user')
+    if (!user) {
+      return { props: {} }
     }
     return {
-      redirect: {
-        permanent: false,
-        destination: '/login',
-      },
-      props: {},
+      props: { user },
     }
-  }
-
-  return {
-    props: {},
-  }
-}
+  },
+  NEXT_IRON_SESSION_CONFIG
+)
 
 export default index

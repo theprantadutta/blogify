@@ -1,9 +1,9 @@
 import { hashSync } from 'bcrypt'
-import { NextApiRequest, NextApiResponse } from 'next'
+import { withIronSession } from 'next-iron-session'
 import prisma from '../../lib/prisma'
-import redis, { REDIS_LOGIN_KEY } from '../../util/redis'
+import { NEXT_IRON_SESSION_CONFIG } from '../../util/constants'
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export default withIronSession(async (req, res) => {
   const { name, email, password } = req.body
 
   if (!name || !email || !password) {
@@ -24,12 +24,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     })
 
     delete user.password
-    delete user.password
-    await redis.set(REDIS_LOGIN_KEY, user.id)
+
+    // setting cookies with next-iron-session
+    req.session.set('user', user)
+    await req.session.save()
+
     return res.status(200).json(user)
   } catch (e) {
     return res.status(422).json({
       error: e.message,
     })
   }
-}
+}, NEXT_IRON_SESSION_CONFIG)

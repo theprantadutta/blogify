@@ -1,19 +1,11 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import prisma from '../../lib/prisma'
-import redis, { REDIS_LOGIN_KEY } from '../../util/redis'
+import { withIronSession } from 'next-iron-session'
+import { NEXT_IRON_SESSION_CONFIG } from '../../util/constants'
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export default withIronSession(async (req, res) => {
   try {
-    const userId = await redis.get(REDIS_LOGIN_KEY)
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: parseInt(userId),
-      },
-    })
-    delete user.password
+    const user = req.session.get('user')
     return res.status(200).json(user)
   } catch (e) {
     return res.status(200).json({})
   }
-}
+}, NEXT_IRON_SESSION_CONFIG)

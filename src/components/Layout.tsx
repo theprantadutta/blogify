@@ -8,7 +8,7 @@ import { ModifiedUser } from '../util/types'
 import Navbar from './Navbar'
 
 const getUser: QueryFunction = async () => {
-  const res = await axios.post(`/api/user`)
+  const res = await axios.get(`/api/user`)
   return res.data
 }
 

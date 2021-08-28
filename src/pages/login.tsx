@@ -12,8 +12,8 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import axios from 'axios'
-import isEmpty from 'lodash/isEmpty'
 import { GetServerSideProps } from 'next'
+import { withIronSession } from 'next-iron-session'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
 import React, { ChangeEvent, useState } from 'react'
@@ -21,7 +21,7 @@ import { useSetRecoilState } from 'recoil'
 import Layout from '../components/Layout'
 import PrimaryButton from '../components/PrimaryButton'
 import { authAtom } from '../state/authState'
-import { API_URL } from '../util/constants'
+import { NEXT_IRON_SESSION_CONFIG } from '../util/constants'
 import { ModifiedUser } from '../util/types'
 
 interface loginProps {
@@ -119,10 +119,11 @@ const login: React.FC<loginProps> = ({ user }) => {
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  try {
-    const { data: user } = await axios.get(API_URL + '/user')
-    if (!isEmpty(user)) {
+export const getServerSideProps: GetServerSideProps = withIronSession(
+  async ({ req, res }) => {
+    const user = req.session.get('user')
+
+    if (user) {
       return {
         redirect: {
           permanent: false,
@@ -131,13 +132,12 @@ export const getServerSideProps: GetServerSideProps = async () => {
         props: {},
       }
     }
-  } catch (e) {
-    console.log('user not authenticated', e.message)
-  }
 
-  return {
-    props: {},
-  }
-}
+    return {
+      props: {},
+    }
+  },
+  NEXT_IRON_SESSION_CONFIG
+)
 
 export default login
