@@ -13,6 +13,7 @@
     "generate": "prisma generate"
   },
   "dependencies": {
+    "@aws-sdk/eventstream-marshaller": "^3.25.0",
     "@chakra-ui/icons": "^1.0.5",
     "@chakra-ui/react": "^1.4.2",
     "@chakra-ui/theme-tools": "1.1.2",
