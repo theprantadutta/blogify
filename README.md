@@ -11,5 +11,4 @@
 
 - NextJS (duh..)
 - Chakra UI
-- Prisma (ORM)
-- Redis
+- SQLite with Prisma (ORM)
