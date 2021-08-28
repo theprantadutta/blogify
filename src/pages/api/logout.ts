@@ -1,7 +1,14 @@
-import { withIronSession } from 'next-iron-session'
-import { NEXT_IRON_SESSION_CONFIG } from '../../util/constants'
+import { NextApiResponse } from 'next'
+import nc from 'next-connect'
+import {
+  API_OPTIONS,
+  IRON_SESSION_MIDDLEWARE,
+  NextApiExtendedRequest,
+} from '../../util/handler'
 
-export default withIronSession((req, res) => {
-  req.session.destroy()
-  return res.status(200).end()
-}, NEXT_IRON_SESSION_CONFIG)
+export default nc<NextApiExtendedRequest, NextApiResponse>(API_OPTIONS)
+  .use(IRON_SESSION_MIDDLEWARE)
+  .post(async (req, res) => {
+    req.session.destroy()
+    return res.status(200).json({ ok: 'OK' })
+  })

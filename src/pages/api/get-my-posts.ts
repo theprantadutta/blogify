@@ -1,11 +1,16 @@
 import { NextApiResponse } from 'next'
-import { withIronSession } from 'next-iron-session'
+import nc from 'next-connect'
 import prisma from '../../lib/prisma'
-import { NEXT_IRON_SESSION_CONFIG } from '../../util/constants'
-import { ExtendedApiRequest, ModifiedUser } from '../../util/types'
+import {
+  API_OPTIONS,
+  IRON_SESSION_MIDDLEWARE,
+  NextApiExtendedRequest,
+} from '../../util/handler'
+import { ModifiedUser } from '../../util/types'
 
-export default withIronSession(
-  async (req: ExtendedApiRequest, res: NextApiResponse) => {
+export default nc<NextApiExtendedRequest, NextApiResponse>(API_OPTIONS)
+  .use(IRON_SESSION_MIDDLEWARE)
+  .post(async (req, res) => {
     const user: ModifiedUser = req.session.get('user')
 
     if (!user) {
@@ -50,6 +55,4 @@ export default withIronSession(
         error: 'Something Went Wrong',
       })
     }
-  },
-  NEXT_IRON_SESSION_CONFIG
-)
+  })

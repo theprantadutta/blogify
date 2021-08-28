@@ -72,7 +72,7 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
   })
 
   const deletePostMutation = useMutation(
-    (id: number) => axios.post('/api/delete-post/' + id),
+    (id: number) => axios.delete('/api/delete-post/' + id),
     {
       onSuccess: () => {
         toast({

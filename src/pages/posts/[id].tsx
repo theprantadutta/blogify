@@ -11,7 +11,7 @@ import { ModifiedUser } from '../../util/types'
 
 const getSinglePost: QueryFunction = async (key) => {
   const postId = key.queryKey[1]
-  const res = await axios.get('/api/get-single-post/' + postId)
+  const res = await axios.get('/api/single-post/' + postId)
   return res.data
 }
 

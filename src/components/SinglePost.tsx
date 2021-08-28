@@ -1,6 +1,7 @@
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import {
   Box,
+  Button,
   Flex,
   IconButton,
   Modal,
@@ -16,7 +17,7 @@ import {
 } from '@chakra-ui/react'
 import { Post } from '@prisma/client'
 import axios from 'axios'
-import router from 'next/dist/client/router'
+import router from 'next/router'
 import React from 'react'
 import { useMutation, useQueryClient } from 'react-query'
 import { useRecoilValue } from 'recoil'
@@ -40,7 +41,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
       ?.isNextPage || false
 
   const deletePostMutation = useMutation(
-    (id: number) => axios.post('/api/delete-post/' + id),
+    (id: number) => axios.delete('/api/delete-post/' + id),
     {
       onSuccess: () => {
         toast({
@@ -89,7 +90,13 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
 
   return (
     <Box>
-      <Flex justify="space-between" alignItems="center">
+      <Flex
+        justify={auth?.id === post.userId ? 'space-between' : 'start'}
+        alignItems="center"
+      >
+        <Button mr="5" colorScheme="purple" onClick={() => router.back()}>
+          Go Back
+        </Button>
         <Text as="p" fontSize="2xl" fontWeight="bold" my="2">
           {post.title}
         </Text>
