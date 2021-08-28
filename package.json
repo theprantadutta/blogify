@@ -7,6 +7,7 @@
     "start": "next start",
     "clean": "npx rimraf .next",
     "migrate": "prisma migrate dev",
+    "migrate:deploy": "npx prisma migrate deploy",
     "studio": "prisma studio",
     "push": "prisma db push",
     "generate": "prisma generate"

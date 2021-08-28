@@ -2,7 +2,7 @@ import { SessionOptions } from 'next-iron-session'
 
 export const IS_PRODUCTION = process.env.NODE_ENV
 export const API_URL = IS_PRODUCTION
-  ? 'https://new-blogify.vercel.app'
+  ? 'http://new-blogify.netlify.app/api'
   : 'http://localhost:3000/api'
 
 export const FEATURES = [
