@@ -8,9 +8,12 @@
 - ✅ Post CRUD with Prisma
 - ✅ Optimistic Updates and Caching with React Query
 - ✅ Popup and Modal with chakra ui
+- ✅ Update Profile and Change Password
 
 ### Stacks used in this projects
 
 - NextJS (duh..)
 - Chakra UI
-- SQLite with Prisma (ORM)
+- MySQL with Prisma (ORM)
+- React Query
+- React Hook Form
