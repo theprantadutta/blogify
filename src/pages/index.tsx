@@ -1,4 +1,5 @@
 import { Box, Heading, Text } from '@chakra-ui/react'
+import { User } from '@prisma/client'
 import { GetServerSideProps } from 'next'
 import { withIronSession } from 'next-iron-session'
 import Link from 'next/link'
@@ -7,13 +8,12 @@ import { useRecoilValue } from 'recoil'
 import Layout from '../components/Layout'
 import { authAtom } from '../state/authState'
 import { FEATURES, NEXT_IRON_SESSION_CONFIG } from '../util/constants'
-import { ModifiedUser } from '../util/types'
 
-interface indexProps {
-  user: ModifiedUser | null
+interface IndexProps {
+  user: User | null
 }
 
-const index: React.FC<indexProps> = ({ user }) => {
+const Index: React.FC<IndexProps> = ({ user }) => {
   const auth = useRecoilValue(authAtom)
   return (
     <Layout user={user}>
@@ -21,7 +21,7 @@ const index: React.FC<indexProps> = ({ user }) => {
         {auth ? (
           <Heading as="h4" fontSize="lg">
             You can now see all the
-            <Link href="/posts">
+            <Link passHref href="/posts">
               <Text as="span" color="purple.700" cursor="pointer">
                 {' '}
                 Posts
@@ -31,7 +31,7 @@ const index: React.FC<indexProps> = ({ user }) => {
         ) : (
           <Heading as="h4" fontSize="lg">
             Please{' '}
-            <Link href="/login">
+            <Link passHref href="/login">
               <Text as="span" color="purple.700" cursor="pointer">
                 Log In
               </Text>
@@ -68,4 +68,4 @@ export const getServerSideProps: GetServerSideProps = withIronSession(
   NEXT_IRON_SESSION_CONFIG
 )
 
-export default index
+export default Index

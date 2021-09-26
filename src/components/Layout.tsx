@@ -2,9 +2,9 @@ import { Box } from '@chakra-ui/react'
 import axios, { AxiosError } from 'axios'
 import React, { useEffect } from 'react'
 import { QueryFunction, useQuery, UseQueryOptions } from 'react-query'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilState } from 'recoil'
 import { authAtom } from '../state/authState'
-import { ModifiedUser } from '../util/types'
+import { User } from '../util/types'
 import Navbar from './Navbar'
 
 const getUser: QueryFunction = async () => {
@@ -12,27 +12,27 @@ const getUser: QueryFunction = async () => {
   return res.data
 }
 
-export function useGetUser<TData = ModifiedUser>(
-  options?: UseQueryOptions<ModifiedUser, AxiosError, TData>
+export function useGetUser<TData = User>(
+  options?: UseQueryOptions<User, AxiosError, TData>
 ) {
   return useQuery('user', getUser, options)
 }
 
 interface LayoutProps {
-  user: ModifiedUser
+  user: User
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, user }) => {
-  const setAuth = useSetRecoilState(authAtom)
+  const [auth, setAuth] = useRecoilState(authAtom)
   useEffect(() => {
     if (user) {
       setAuth(user)
     } else {
       setAuth(null)
     }
-  }, [])
+  }, [auth, setAuth, user])
   return (
-    <Box width="xl" marginX="auto" marginTop="10">
+    <Box maxWidth="4xl" marginX="auto" marginTop="10">
       <Navbar />
       {children}
     </Box>

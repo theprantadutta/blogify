@@ -1,12 +1,12 @@
+import { User } from '@prisma/client'
 import { GetServerSideProps } from 'next'
 import React from 'react'
 import Layout from '../../components/Layout'
 import PostForm from '../../components/PostForm'
 import withAuth from '../../HOCs/withAuth'
-import { ModifiedUser } from '../../util/types'
 
 interface NewPostProps {
-  user: ModifiedUser | null
+  user: User | null
 }
 
 const NewPost: React.FC<NewPostProps> = ({ user }) => {

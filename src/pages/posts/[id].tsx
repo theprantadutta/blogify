@@ -1,13 +1,12 @@
-import { Post } from '@prisma/client'
+import { Post, User } from '@prisma/client'
 import axios, { AxiosError } from 'axios'
 import { GetServerSideProps } from 'next'
 import React from 'react'
 import { QueryFunction, useQuery, UseQueryOptions } from 'react-query'
 import Layout from '../../components/Layout'
-import LoadingButton from '../../components/LoadingButton'
+import { FullWidthReactLoader } from '../../components/ReactLoader'
 import SinglePost from '../../components/SinglePost'
 import withAuth from '../../HOCs/withAuth'
-import { ModifiedUser } from '../../util/types'
 
 const getSinglePost: QueryFunction = async (key) => {
   const postId = key.queryKey[1]
@@ -23,7 +22,7 @@ export function useGetSinglePost<TData = Post>(
 }
 
 interface EditPostProps {
-  user: ModifiedUser | null
+  user: User | null
   postId: string
 }
 
@@ -31,7 +30,7 @@ const EditPost: React.FC<EditPostProps> = ({ user, postId }) => {
   const { data: postData, status } = useGetSinglePost(postId)
   return (
     <Layout user={user}>
-      {status === 'loading' && <LoadingButton />}
+      {status === 'loading' && <FullWidthReactLoader />}
 
       {postData && <SinglePost post={postData} />}
 

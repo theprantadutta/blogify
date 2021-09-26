@@ -1,14 +1,7 @@
-import { NextApiResponse } from 'next'
-import nc from 'next-connect'
 import prisma from '../../../lib/prisma'
-import {
-  API_OPTIONS,
-  IRON_SESSION_MIDDLEWARE,
-  NextApiExtendedRequest,
-} from '../../../util/handler'
+import handler from '../../../util/handler'
 
-export default nc<NextApiExtendedRequest, NextApiResponse>(API_OPTIONS)
-  .use(IRON_SESSION_MIDDLEWARE)
+export default handler()
   .get(async (req, res) => {
     const user = req.session.get('user')
 

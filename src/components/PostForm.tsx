@@ -15,8 +15,8 @@ import React, { ChangeEvent, useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from 'react-query'
 import { useRecoilValue } from 'recoil'
 import { authAtom } from '../state/authState'
-import LoadingButton from './LoadingButton'
 import PrimaryButton from './PrimaryButton'
+import ReactLoader from './ReactLoader'
 
 interface PostFormProps {
   post?: Post
@@ -74,6 +74,7 @@ const PostForm: React.FC<PostFormProps> = ({
           duration: 9000,
           isClosable: true,
         })
+        return router.push('/posts')
       }, // When mutate is called:
       onMutate: async (post: Post) => {
         console.log(`post`, post)
@@ -130,9 +131,15 @@ const PostForm: React.FC<PostFormProps> = ({
     }
     setSubmitting(true)
     addPostMutation.mutate(upsertPostValues)
-    setError(null)
-    setSubmitting(false)
-    return router.push('/posts')
+
+    // while (addPostMutation.status === 'idle') {
+    //   setError(null)
+    //   setSubmitting(false)
+    // }
+
+    // if (addPostMutation.status === 'success') {
+    //   await router.push('/posts')
+    // }
   }
 
   const handleChange = (
@@ -141,7 +148,7 @@ const PostForm: React.FC<PostFormProps> = ({
     setNewPostValues({ ...newPostValues, [e.target.name]: e.target.value })
   }
   return (
-    <Box>
+    <Box width="xl" mx="auto" marginTop="4">
       <Heading my="5" as="h4" fontSize="xl" fontWeight="bold">
         {pageTitle}
       </Heading>
@@ -178,17 +185,15 @@ const PostForm: React.FC<PostFormProps> = ({
           />
         </FormControl>
 
-        {submitting ? (
-          <LoadingButton loadingText="Submitting" />
-        ) : (
-          <PrimaryButton w="100%" my="5" type="submit" marginX="0">
-            {buttonName}
-          </PrimaryButton>
-        )}
-        {/* 
-        <PrimaryButton w="100%" my="5" type="submit" marginX="0">
-          {buttonName}
-        </PrimaryButton> */}
+        <PrimaryButton
+          disabled={submitting}
+          w="100%"
+          my="5"
+          type="submit"
+          marginX="0"
+        >
+          {submitting ? <ReactLoader /> : buttonName}
+        </PrimaryButton>
       </form>
     </Box>
   )

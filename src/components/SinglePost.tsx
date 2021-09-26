@@ -72,7 +72,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
       },
 
       // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (err, variables, context) => {
+      onError: (_err, _variables, context) => {
         if ('posts' in context && 'isNextPage' in context) {
           queryClient.setQueryData<PostsWithIsNext>(['all-posts', 'all', 1], {
             posts: context.posts,
@@ -88,18 +88,19 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
     }
   )
 
+  const ownership = auth?.id === post.userId
+
   return (
     <Box>
-      <Flex
-        justify={auth?.id === post.userId ? 'space-between' : 'start'}
-        alignItems="center"
-      >
-        <Button mr="5" colorScheme="purple" onClick={() => router.back()}>
-          Go Back
-        </Button>
-        <Text as="p" fontSize="2xl" fontWeight="bold" my="2">
-          {post.title}
-        </Text>
+      <Flex justify={ownership ? 'space-between' : 'start'} alignItems="center">
+        <Flex justify={'space-between'} alignItems="center">
+          <Button colorScheme="purple" onClick={() => router.back()}>
+            Go Back
+          </Button>
+          <Text as="p" fontSize="2xl" fontWeight="bold" my="2" ml="2">
+            {post.title}
+          </Text>
+        </Flex>
         {auth?.id === post.userId && (
           <Box>
             <IconButton
@@ -112,7 +113,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
               onClick={() => router.push(`/posts/edit/${post.id}`)}
             />
             <IconButton
-              mr={2}
+              ml={2}
               variant="outline"
               colorScheme="red"
               aria-label="Call Sage"

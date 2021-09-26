@@ -31,12 +31,13 @@ import {
 } from 'react-query'
 import { useRecoilValue } from 'recoil'
 import { authAtom } from '../state/authState'
-import LoadingButton from './LoadingButton'
 import PrimaryButton from './PrimaryButton'
+import { FullWidthReactLoader } from './ReactLoader'
 
 export interface PostsWithIsNext {
   posts: Post[]
   isNextPage: boolean
+  totalPage: number
 }
 
 const getPosts: QueryFunction = async (key) => {
@@ -72,7 +73,7 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
   })
 
   const deletePostMutation = useMutation(
-    (id: number) => axios.delete('/api/delete-post/' + id),
+    (id: number) => axios.delete('/api/single-post/' + id),
     {
       onSuccess: () => {
         toast({
@@ -95,7 +96,7 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
         // Optimistically update to the new value
         queryClient.setQueryData<PostsWithIsNext>(
           ['all-posts', postMode, page],
-          { posts, isNextPage: data.isNextPage }
+          { posts, isNextPage: data.isNextPage, totalPage: data.totalPage }
         )
 
         return { posts, isNextPage: data.isNextPage }
@@ -106,7 +107,11 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
         if ('posts' in context && 'isNextPage' in context) {
           queryClient.setQueryData<PostsWithIsNext>(
             ['all-posts', postMode, page],
-            { posts: context?.posts, isNextPage: data?.isNextPage }
+            {
+              posts: context?.posts,
+              isNextPage: data?.isNextPage,
+              totalPage: data.totalPage,
+            }
           )
         }
       },
@@ -142,13 +147,13 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
       </Flex>
 
       <Heading as="h4">Showing {postMode} posts</Heading>
-      {isLoading && <LoadingButton />}
+      {isLoading && <FullWidthReactLoader />}
       {data?.posts &&
         data?.posts.map((post) => {
           return (
             <Box key={post.id} my="2" overflow="hidden">
               <Flex alignItems="center">
-                <Link href={`/posts/${post.id}`}>
+                <Link passHref href={`/posts/${post.id}`}>
                   <Text
                     color="purple.700"
                     cursor="pointer"
@@ -236,7 +241,7 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
             Previous Page
           </PrimaryButton>
           <Heading fontSize="lg" fontWeight="bold">
-            Page {page}
+            Showing Page {page} of {data.totalPage}
           </Heading>
           <PrimaryButton
             disabled={!data?.isNextPage}

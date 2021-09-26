@@ -19,3 +19,9 @@ export const API_OPTIONS: Options<NextApiExtendedRequest, NextApiResponse> = {
     res.status(405).json({ error: `Method ${req.method} Not Allowed` })
   },
 }
+
+export default function handler() {
+  return nc<NextApiExtendedRequest, NextApiResponse>(API_OPTIONS).use(
+    IRON_SESSION_MIDDLEWARE
+  )
+}

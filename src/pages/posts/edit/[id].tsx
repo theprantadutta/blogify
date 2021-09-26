@@ -1,14 +1,14 @@
+import { User } from '@prisma/client'
 import { GetServerSideProps } from 'next'
 import React from 'react'
 import Layout from '../../../components/Layout'
-import LoadingButton from '../../../components/LoadingButton'
 import PostForm from '../../../components/PostForm'
+import { FullWidthReactLoader } from '../../../components/ReactLoader'
 import withAuth from '../../../HOCs/withAuth'
-import { ModifiedUser } from '../../../util/types'
 import { useGetSinglePost } from '../[id]'
 
 interface EditPostProps {
-  user: ModifiedUser | null
+  user: User | null
   postId: string
 }
 
@@ -16,7 +16,7 @@ const EditPost: React.FC<EditPostProps> = ({ user, postId }) => {
   const { data: postData, status } = useGetSinglePost(postId)
   return (
     <Layout user={user}>
-      {status === 'loading' && <LoadingButton />}
+      {status === 'loading' && <FullWidthReactLoader />}
 
       {status === 'error' && <p>Post Not Found</p>}
 

@@ -1,5 +1,4 @@
 import { NextPageContext } from 'next'
-import { Handler } from 'next-iron-session'
 import withSession from '../lib/session'
 
 function _withAuth(handler: any) {
@@ -25,6 +24,6 @@ function _withAuth(handler: any) {
   }
 }
 
-export default function withAuth(handler: Handler) {
+export default function withAuth(handler: any) {
   return withSession(_withAuth(handler))
 }

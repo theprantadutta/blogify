@@ -30,18 +30,20 @@ interface NavbarProps {}
 
 const Navbar: React.FC<NavbarProps> = ({}) => {
   const toast = useToast()
-  const { push } = useRouter()
+  const router = useRouter()
   const [auth, setAuth] = useRecoilState(authAtom)
   const { refetch } = useGetUser()
   return (
     <Flex alignItems="center">
       <Box>
-        <Heading size="md" as="h1">
-          Blogify
-        </Heading>
+        <Link href="/" passHref>
+          <Heading size="xl" color="purple.500" as="h1" cursor="pointer">
+            Blogify
+          </Heading>
+        </Link>
       </Box>
       <Spacer />
-      <Box m="4">
+      <Box my="4">
         {auth ? (
           <>
             {LoggedInLinks.map((link) => {
@@ -54,8 +56,9 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
             <Popover placement="bottom-end" matchWidth>
               <PopoverTrigger>
                 <IconButton
+                  marginLeft="2"
                   _focus={{ ring: 0 }}
-                  aria-label="Call Segun"
+                  aria-label="User ICON"
                   size="md"
                   variant="outline"
                   icon={<Icon as={FaUserCircle} />}
@@ -70,7 +73,11 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
                 {/* <PopoverCloseButton /> */}
                 <PopoverBody>
                   <Button textColor="purple.600" my="1">
-                    <Link href={`/users/${auth.id}`}>Edit Profile</Link>
+                    <Link href={`/edit-profile`}>Edit Profile</Link>
+                  </Button>
+                  <Divider />
+                  <Button textColor="purple.600" my="1">
+                    <Link href={`/change-password`}>Change Password</Link>
                   </Button>
                   <Divider />
                   <Button
@@ -79,7 +86,7 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
                     onClick={async () => {
                       try {
                         await axios.post('/api/logout')
-                        refetch()
+                        await refetch()
                         setAuth(null)
                         toast({
                           title: `Logout Successful`,
@@ -88,7 +95,7 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
                           position: 'top-right',
                           isClosable: true,
                         })
-                        return push('/')
+                        await router.push('/')
                       } catch (e) {
                         console.log('Error in Logging Out', e.response)
                       }

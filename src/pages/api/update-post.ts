@@ -1,13 +1,7 @@
-import { NextApiResponse } from 'next'
-import nc from 'next-connect'
 import prisma from '../../lib/prisma'
-import {
-  API_OPTIONS,
-  IRON_SESSION_MIDDLEWARE,
-  NextApiExtendedRequest,
-} from '../../util/handler'
+import handler, { IRON_SESSION_MIDDLEWARE } from '../../util/handler'
 
-export default nc<NextApiExtendedRequest, NextApiResponse>(API_OPTIONS)
+export default handler()
   .use(IRON_SESSION_MIDDLEWARE)
   .post(async (req, res) => {
     const user = req.session.get('user')
