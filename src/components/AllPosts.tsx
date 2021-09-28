@@ -15,10 +15,11 @@ import {
   Spacer,
   Text,
   useDisclosure,
-  useToast,
+  useToast
 } from '@chakra-ui/react'
 import { Post } from '@prisma/client'
 import axios, { AxiosError } from 'axios'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -27,7 +28,7 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
-  UseQueryOptions,
+  UseQueryOptions
 } from 'react-query'
 import { useRecoilValue } from 'recoil'
 import { authAtom } from '../state/authState'
@@ -149,53 +150,64 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
       <Heading as="h4">Showing {postMode} posts</Heading>
       {isLoading && <FullWidthReactLoader />}
       {data?.posts &&
-        data?.posts.map((post) => {
+        data?.posts.map((post, i) => {
           return (
-            <Box key={post.id} my="2" overflow="hidden">
-              <Flex alignItems="center">
-                <Link passHref href={`/posts/${post.id}`}>
-                  <Text
-                    color="purple.700"
-                    cursor="pointer"
-                    as="p"
-                    fontSize="xl"
-                    fontWeight="semibold"
-                    my="2"
-                  >
-                    {post.title}
-                  </Text>
-                </Link>
-                <Spacer />
-                {post.userId === auth?.id && (
-                  <>
-                    <IconButton
-                      m="2"
-                      variant="outline"
-                      colorScheme="purple"
-                      aria-label="Call Sage"
-                      fontSize="20px"
-                      icon={<EditIcon />}
-                      onClick={() => router.push(`/posts/edit/${post.id}`)}
-                    />
-                    <IconButton
-                      mr={2}
-                      variant="outline"
-                      colorScheme="red"
-                      aria-label="Call Sage"
-                      fontSize="20px"
-                      icon={<DeleteIcon />}
-                      onClick={() => {
-                        setPostId(post.id)
-                        onOpen()
-                      }}
-                    />
-                  </>
-                )}
-              </Flex>
-              <Text isTruncated as="p" my="2">
-                {post.content}
-              </Text>
-            </Box>
+            <motion.div
+              initial={{ x: i % 2 === 0 ? '-100vw' : '100vw' }}
+              animate={{ x: 0 }}
+              transition={{ delay: 0.5 * i, duration: 0.8, stiffness: 120 }}
+              key={post.id}
+            >
+              <Box my="2" overflow="hidden">
+                <Flex alignItems="center">
+                  <Link passHref href={`/posts/${post.id}`}>
+                    <Text
+                      color="purple.700"
+                      cursor="pointer"
+                      as="p"
+                      fontSize="xl"
+                      fontWeight="semibold"
+                      my="2"
+                    >
+                      {post.title}
+                    </Text>
+                  </Link>
+                  <Spacer />
+                  {post.userId === auth?.id && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1, duration: 1 }}
+                    >
+                      <IconButton
+                        m="2"
+                        variant="outline"
+                        colorScheme="purple"
+                        aria-label="Call Sage"
+                        fontSize="20px"
+                        icon={<EditIcon />}
+                        onClick={() => router.push(`/posts/edit/${post.id}`)}
+                      />
+                      <IconButton
+                        mr={2}
+                        variant="outline"
+                        colorScheme="red"
+                        aria-label="Call Sage"
+                        fontSize="20px"
+                        icon={<DeleteIcon />}
+                        onClick={() => {
+                          setPostId(post.id)
+                          onOpen()
+                        }}
+                      />
+                    </motion.div>
+                  )}
+                </Flex>
+                <Text isTruncated as="p" my="2">
+                  {post.content}
+                </Text>
+              </Box>
+            </motion.div>
           )
         })}
 
@@ -234,21 +246,39 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
 
       {status === 'success' && (
         <Flex justify="space-between" alignItems="center">
-          <PrimaryButton
-            disabled={page === 1}
-            onClick={() => setPage(Math.max(page - 1, 1))}
+          <motion.div
+            initial={{ x: '-100vw' }}
+            animate={{ x: 0 }}
+            transition={{ delay: 1, duration: 2 }}
           >
-            Previous Page
-          </PrimaryButton>
-          <Heading fontSize="lg" fontWeight="bold">
-            Showing Page {page} of {data.totalPage}
-          </Heading>
-          <PrimaryButton
-            disabled={!data?.isNextPage}
-            onClick={() => setPage(page + 1)}
+            <PrimaryButton
+              disabled={page === 1}
+              onClick={() => setPage(Math.max(page - 1, 1))}
+            >
+              Previous Page
+            </PrimaryButton>
+          </motion.div>
+          <motion.div
+            initial={{ y: '100vh' }}
+            animate={{ y: 0 }}
+            transition={{ delay: 1, duration: 2 }}
           >
-            Next Page
-          </PrimaryButton>
+            <Heading fontSize="lg" fontWeight="bold">
+              Showing Page {page} of {data.totalPage}
+            </Heading>
+          </motion.div>
+          <motion.div
+            initial={{ x: '100vw' }}
+            animate={{ x: 0 }}
+            transition={{ delay: 1, duration: 2 }}
+          >
+            <PrimaryButton
+              disabled={!data?.isNextPage}
+              onClick={() => setPage(page + 1)}
+            >
+              Next Page
+            </PrimaryButton>
+          </motion.div>
         </Flex>
       )}
     </Box>

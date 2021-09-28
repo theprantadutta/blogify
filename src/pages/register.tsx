@@ -2,6 +2,7 @@ import { Box, Flex, Heading, Spacer } from '@chakra-ui/react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { User } from '@prisma/client'
 import axios from 'axios'
+import { motion } from 'framer-motion'
 import { GetServerSideProps } from 'next'
 import { withIronSession } from 'next-iron-session'
 import { useRouter } from 'next/dist/client/router'
@@ -17,6 +18,11 @@ import PrimaryButton from '../components/PrimaryButton'
 import ReactLoader from '../components/ReactLoader'
 import { authAtom } from '../state/authState'
 import { NEXT_IRON_SESSION_CONFIG } from '../util/constants'
+import {
+  fromTheBottomVariants,
+  fromTheLeftVariants,
+  fromTheRightVariants,
+} from '../util/variants'
 
 interface RegisterProps {
   user: User | null
@@ -86,66 +92,74 @@ const Register: React.FC<RegisterProps> = ({ user }) => {
     <Layout user={user}>
       <Box width="xl" mx="auto" marginTop="4">
         <Heading as="h4" fontSize="xl" fontWeight="bold">
-          Login to your Account
+          Register An Account
         </Heading>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Box mt="5">
-            <Controller
-              name="name"
-              control={control}
-              defaultValue={''}
-              render={({ field }) => (
-                <InputTextField
-                  error={errors?.name?.message}
-                  label="Enter Your Name"
-                  placeholder="Your Name"
-                  field={field}
-                />
-              )}
-            />
-          </Box>
+          <motion.div variants={fromTheLeftVariants()}>
+            <Box mt="5">
+              <Controller
+                name="name"
+                control={control}
+                defaultValue={''}
+                render={({ field }) => (
+                  <InputTextField
+                    error={errors?.name?.message}
+                    label="Enter Your Name"
+                    placeholder="Your Name"
+                    field={field}
+                  />
+                )}
+              />
+            </Box>
+          </motion.div>
 
-          <Box my="5">
-            <Controller
-              name="email"
-              control={control}
-              defaultValue={''}
-              render={({ field }) => (
-                <InputTextField
-                  error={errors?.email?.message}
-                  label="Enter Your Email"
-                  placeholder="johndoe@gmail.com"
-                  field={field}
-                />
-              )}
-            />
-          </Box>
+          <motion.div variants={fromTheRightVariants()}>
+            <Box my="5">
+              <Controller
+                name="email"
+                control={control}
+                defaultValue={''}
+                render={({ field }) => (
+                  <InputTextField
+                    error={errors?.email?.message}
+                    label="Enter Your Email"
+                    placeholder="johndoe@gmail.com"
+                    field={field}
+                  />
+                )}
+              />
+            </Box>
+          </motion.div>
 
-          <Box mt="5">
-            <Controller
-              name="password"
-              control={control}
-              defaultValue={''}
-              render={({ field }) => (
-                <InputPasswordField
-                  error={errors?.password?.message}
-                  label="Enter Your Passsword"
-                  placeholder="Your password here"
-                  field={field}
-                />
-              )}
-            />
-          </Box>
+          <motion.div variants={fromTheLeftVariants()}>
+            <Box mt="5">
+              <Controller
+                name="password"
+                control={control}
+                defaultValue={''}
+                render={({ field }) => (
+                  <InputPasswordField
+                    error={errors?.password?.message}
+                    label="Enter Your Passsword"
+                    placeholder="Your password here"
+                    field={field}
+                  />
+                )}
+              />
+            </Box>
+          </motion.div>
 
-          <Flex>
-            <PrimaryButton my="5" type="submit" disabled={loading}>
-              {loading ? <ReactLoader /> : 'Register'}
-            </PrimaryButton>
-            <Spacer />
-            <PrimaryButton my="5" type="button">
-              <Link href="/login">Login Instead</Link>
-            </PrimaryButton>
-          </Flex>
+          <motion.div variants={fromTheBottomVariants()}>
+            <Flex>
+              <PrimaryButton my="5" type="submit" disabled={loading}>
+                {loading ? <ReactLoader /> : 'Register'}
+              </PrimaryButton>
+              <Spacer />
+              <PrimaryButton my="5" type="button">
+                <Link href="/login">Login Instead</Link>
+              </PrimaryButton>
+            </Flex>{' '}
+          </motion.div>
         </form>
       </Box>
     </Layout>

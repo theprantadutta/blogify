@@ -3,6 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { User } from '@prisma/client'
 import axios from 'axios'
 import dayjs from 'dayjs'
+import { motion } from 'framer-motion'
 import type { GetServerSideProps, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import React, { ReactNode, useState } from 'react'
@@ -18,6 +19,11 @@ import ReactLoader from '../components/ReactLoader'
 import withAuth from '../HOCs/withAuth'
 import { authAtom } from '../state/authState'
 import { eighteenYearsBackFromNow } from '../util/functions'
+import {
+  formVariants,
+  fromTheLeftVariants,
+  fromTheRightVariants,
+} from '../util/variants'
 
 interface EditProfileProps {
   children?: ReactNode
@@ -118,84 +124,102 @@ const EditProfile: NextPage<EditProfileProps> = ({ user }) => {
           Edit Profile
         </Heading>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Box my="2">
-            <Controller
-              name="name"
-              control={control}
-              defaultValue={user.name}
-              render={({ field }) => (
-                <InputTextField
-                  error={errors?.name?.message}
-                  label="Your Name"
-                  field={field}
-                />
-              )}
-            />
-          </Box>
+        <motion.form
+          variants={formVariants()}
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <motion.div variants={fromTheLeftVariants()}>
+            <Box my="2">
+              <Controller
+                name="name"
+                control={control}
+                defaultValue={user.name}
+                render={({ field }) => (
+                  <InputTextField
+                    error={errors?.name?.message}
+                    label="Your Name"
+                    field={field}
+                  />
+                )}
+              />
+            </Box>
+          </motion.div>
 
-          <Flex gridGap="5" my="2">
-            <Controller
-              name="email"
-              control={control}
-              defaultValue={user.email}
-              render={({ field }) => (
-                <InputTextField
-                  error={errors?.email?.message}
-                  label="Your Email"
-                  field={field}
-                />
-              )}
-            />
-            <Controller
-              name="mobileNo"
-              control={control}
-              defaultValue={(user.mobileNo as any) ?? ''}
-              render={({ field }) => (
-                <InputTextField
-                  error={errors?.mobileNo?.message}
-                  isLeftAddOn
-                  placeholder="17XXXXXXXX"
-                  isLeftAddOnValue="+880"
-                  label="Your Mobile No"
-                  field={field}
-                />
-              )}
-            />
+          <Flex justify="space-between" gridGap="5" my="2">
+            <motion.div
+              style={{ width: '100%' }}
+              variants={fromTheLeftVariants()}
+            >
+              <Controller
+                name="email"
+                control={control}
+                defaultValue={user.email}
+                render={({ field }) => (
+                  <InputTextField
+                    error={errors?.email?.message}
+                    label="Your Email"
+                    field={field}
+                  />
+                )}
+              />
+            </motion.div>
+
+            <motion.div
+              style={{ width: '100%' }}
+              variants={fromTheRightVariants()}
+            >
+              <Controller
+                name="mobileNo"
+                control={control}
+                defaultValue={(user.mobileNo as any) ?? ''}
+                render={({ field }) => (
+                  <InputTextField
+                    error={errors?.mobileNo?.message}
+                    isLeftAddOn
+                    placeholder="17XXXXXXXX"
+                    isLeftAddOnValue="+880"
+                    label="Your Mobile No"
+                    field={field}
+                  />
+                )}
+              />
+            </motion.div>
           </Flex>
 
-          <Flex gridGap="5">
-            <Controller
-              name="gender"
-              control={control}
-              defaultValue={user?.gender ?? ''}
-              render={({ field }) => (
-                <InputSelectField
-                  options={['male', 'female']}
-                  label="Your Gender"
-                  error={errors?.gender?.message}
-                  field={field}
-                />
-              )}
-            />
-            <Controller
-              name="dateOfBirth"
-              control={control}
-              defaultValue={
-                user.dateOfBirth
-                  ? (dayjs(user?.dateOfBirth).format('YYYY-MM-DD') as any)
-                  : (dayjs().subtract(18, 'year').format('YYYY-MM-DD') as any)
-              }
-              render={({ field }) => (
-                <InputDateField
-                  placeholder="Enter Your Birth Date"
-                  label="Your Date of Birth"
-                  error={errors?.dateOfBirth?.message}
-                  field={field}
-                />
-              )}
-            />
-          </Flex>
+          <motion.div variants={fromTheRightVariants()}>
+            <Flex gridGap="5">
+              <Controller
+                name="gender"
+                control={control}
+                defaultValue={user?.gender ?? ''}
+                render={({ field }) => (
+                  <InputSelectField
+                    options={['male', 'female']}
+                    label="Your Gender"
+                    error={errors?.gender?.message}
+                    field={field}
+                  />
+                )}
+              />
+              <Controller
+                name="dateOfBirth"
+                control={control}
+                defaultValue={
+                  user.dateOfBirth
+                    ? (dayjs(user?.dateOfBirth).format('YYYY-MM-DD') as any)
+                    : (dayjs().subtract(18, 'year').format('YYYY-MM-DD') as any)
+                }
+                render={({ field }) => (
+                  <InputDateField
+                    placeholder="Enter Your Birth Date"
+                    label="Your Date of Birth"
+                    error={errors?.dateOfBirth?.message}
+                    field={field}
+                  />
+                )}
+              />
+            </Flex>
+          </motion.div>
 
           <PrimaryButton
             disabled={submitting}
@@ -206,7 +230,7 @@ const EditProfile: NextPage<EditProfileProps> = ({ user }) => {
           >
             {submitting ? <ReactLoader /> : 'Update Profile'}
           </PrimaryButton>
-        </form>
+        </motion.form>
       </Box>
     </Layout>
   )

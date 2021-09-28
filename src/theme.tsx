@@ -17,6 +17,14 @@ const theme = extendTheme({
   },
   fonts,
   breakpoints,
+  styles: {
+    global: {
+      'html, body': {
+        overflowX: 'hidden',
+        overflowY: 'hidden',
+      },
+    },
+  },
 })
 
 export default theme

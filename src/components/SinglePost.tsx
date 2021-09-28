@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react'
 import { Post } from '@prisma/client'
 import axios from 'axios'
+import { motion } from 'framer-motion'
 import router from 'next/router'
 import React from 'react'
 import { useMutation, useQueryClient } from 'react-query'
@@ -107,9 +108,15 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
           <Button colorScheme="purple" onClick={() => router.back()}>
             Go Back
           </Button>
-          <Text as="p" fontSize="2xl" fontWeight="bold" my="2" ml="2">
-            {post.title}
-          </Text>
+          <motion.div
+            initial={{ y: '-100vh' }}
+            animate={{ y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Text as="p" fontSize="2xl" fontWeight="bold" my="2" ml="2">
+              {post.title}
+            </Text>
+          </motion.div>
         </Flex>
         {auth?.id === post.userId && (
           <Box>
@@ -161,9 +168,15 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
           </Box>
         )}
       </Flex>
-      <Text as="p" my="2" fontSize="xl">
-        {post.content}
-      </Text>
+      <motion.div
+        initial={{ y: '100vh' }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Text as="p" my="2" fontSize="xl">
+          {post.content}
+        </Text>
+      </motion.div>
     </Box>
   )
 }

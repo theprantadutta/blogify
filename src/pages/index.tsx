@@ -1,5 +1,6 @@
 import { Box, Heading, Text } from '@chakra-ui/react'
 import { User } from '@prisma/client'
+import { motion } from 'framer-motion'
 import { GetServerSideProps } from 'next'
 import { withIronSession } from 'next-iron-session'
 import Link from 'next/link'
@@ -8,6 +9,7 @@ import { useRecoilValue } from 'recoil'
 import Layout from '../components/Layout'
 import { authAtom } from '../state/authState'
 import { FEATURES, NEXT_IRON_SESSION_CONFIG } from '../util/constants'
+import { fromTheLeftVariants } from '../util/variants'
 
 interface IndexProps {
   user: User | null
@@ -44,12 +46,14 @@ const Index: React.FC<IndexProps> = ({ user }) => {
         Project Features
       </Text>
 
-      {FEATURES.map((feature) => (
-        <Box key={feature} my="2">
-          <Text fontWeight="semibold" color="purple.500">
-            ✅ {feature}
-          </Text>
-        </Box>
+      {FEATURES.map((feature, i) => (
+        <motion.div key={feature} variants={fromTheLeftVariants(0.5 * i)}>
+          <Box my="2">
+            <Text fontWeight="semibold" color="purple.500">
+              ✅ {feature}
+            </Text>
+          </Box>
+        </motion.div>
       ))}
     </Layout>
   )

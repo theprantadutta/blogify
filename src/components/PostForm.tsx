@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react'
 import { Post } from '@prisma/client'
 import axios from 'axios'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/dist/client/router'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from 'react-query'
@@ -131,15 +132,6 @@ const PostForm: React.FC<PostFormProps> = ({
     }
     setSubmitting(true)
     addPostMutation.mutate(upsertPostValues)
-
-    // while (addPostMutation.status === 'idle') {
-    //   setError(null)
-    //   setSubmitting(false)
-    // }
-
-    // if (addPostMutation.status === 'success') {
-    //   await router.push('/posts')
-    // }
   }
 
   const handleChange = (
@@ -153,7 +145,12 @@ const PostForm: React.FC<PostFormProps> = ({
         {pageTitle}
       </Heading>
 
-      <form onSubmit={handleSubmit}>
+      <motion.form
+        initial={{ y: '-100vh' }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.5, duration: 1 }}
+        onSubmit={handleSubmit}
+      >
         <FormControl my="5" id="email">
           <FormLabel>Post Title</FormLabel>
           <Input
@@ -185,16 +182,22 @@ const PostForm: React.FC<PostFormProps> = ({
           />
         </FormControl>
 
-        <PrimaryButton
-          disabled={submitting}
-          w="100%"
-          my="5"
-          type="submit"
-          marginX="0"
+        <motion.div
+          initial={{ opacity: 0, y: '100vh' }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 2 }}
         >
-          {submitting ? <ReactLoader /> : buttonName}
-        </PrimaryButton>
-      </form>
+          <PrimaryButton
+            disabled={submitting}
+            w="100%"
+            my="5"
+            type="submit"
+            marginX="0"
+          >
+            {submitting ? <ReactLoader /> : buttonName}
+          </PrimaryButton>
+        </motion.div>
+      </motion.form>
     </Box>
   )
 }

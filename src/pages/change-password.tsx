@@ -2,6 +2,7 @@ import { Box, Heading, useToast } from '@chakra-ui/react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { User } from '@prisma/client'
 import axios from 'axios'
+import { motion } from 'framer-motion'
 import type { GetServerSideProps, NextPage } from 'next'
 import { useRouter } from 'next/router'
 import React, { ReactNode, useState } from 'react'
@@ -12,6 +13,11 @@ import Layout from '../components/Layout'
 import PrimaryButton from '../components/PrimaryButton'
 import ReactLoader from '../components/ReactLoader'
 import withAuth from '../HOCs/withAuth'
+import {
+  formVariants,
+  fromTheLeftVariants,
+  fromTheRightVariants,
+} from '../util/variants'
 
 interface ChangePasswordProps {
   children?: ReactNode
@@ -87,54 +93,63 @@ const ChangePassword: NextPage<ChangePasswordProps> = ({ user }) => {
           Change Password
         </Heading>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Box my="2">
-            <Controller
-              name="currentPassword"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <InputPasswordField
-                  error={errors?.currentPassword?.message}
-                  placeholder="Enter Your Current Password"
-                  label="Current Password"
-                  field={field}
-                />
-              )}
-            />
-          </Box>
+        <motion.form
+          variants={formVariants()}
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <motion.div variants={fromTheLeftVariants()}>
+            <Box my="2">
+              <Controller
+                name="currentPassword"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <InputPasswordField
+                    error={errors?.currentPassword?.message}
+                    placeholder="Enter Your Current Password"
+                    label="Current Password"
+                    field={field}
+                  />
+                )}
+              />
+            </Box>
+          </motion.div>
 
-          <Box my="2">
-            <Controller
-              name="newPassword"
-              control={control}
-              defaultValue={''}
-              render={({ field }) => (
-                <InputPasswordField
-                  error={errors?.newPassword?.message}
-                  label="New Password"
-                  placeholder="Enter New Password"
-                  field={field}
-                />
-              )}
-            />
-          </Box>
+          <motion.div variants={fromTheRightVariants()}>
+            <Box my="2">
+              <Controller
+                name="newPassword"
+                control={control}
+                defaultValue={''}
+                render={({ field }) => (
+                  <InputPasswordField
+                    error={errors?.newPassword?.message}
+                    label="New Password"
+                    placeholder="Enter New Password"
+                    field={field}
+                  />
+                )}
+              />
+            </Box>
+          </motion.div>
 
-          <Box my="2">
-            <Controller
-              name="confirmPassword"
-              control={control}
-              defaultValue={''}
-              render={({ field }) => (
-                <InputPasswordField
-                  error={errors?.confirmPassword?.message}
-                  label="Confirm Password"
-                  placeholder="Confirm Password"
-                  field={field}
-                />
-              )}
-            />
-          </Box>
+          <motion.div variants={fromTheLeftVariants()}>
+            <Box my="2">
+              <Controller
+                name="confirmPassword"
+                control={control}
+                defaultValue={''}
+                render={({ field }) => (
+                  <InputPasswordField
+                    error={errors?.confirmPassword?.message}
+                    label="Confirm Password"
+                    placeholder="Confirm Password"
+                    field={field}
+                  />
+                )}
+              />
+            </Box>
+          </motion.div>
 
           <PrimaryButton
             disabled={submitting}
@@ -145,7 +160,7 @@ const ChangePassword: NextPage<ChangePasswordProps> = ({ user }) => {
           >
             {submitting ? <ReactLoader /> : 'Update Profile'}
           </PrimaryButton>
-        </form>
+        </motion.form>
       </Box>
     </Layout>
   )

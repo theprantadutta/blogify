@@ -3,7 +3,6 @@ import { User } from '@prisma/client'
 import React, { useEffect } from 'react'
 import { useRecoilState } from 'recoil'
 import { authAtom } from '../state/authState'
-import Navbar from './Navbar'
 
 interface LayoutProps {
   user: User
@@ -19,8 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user }) => {
     }
   }, [auth, setAuth, user])
   return (
-    <Box maxWidth="4xl" marginX="auto" marginTop="10">
-      <Navbar />
+    <Box maxWidth="4xl" marginX="auto">
       {children}
     </Box>
   )

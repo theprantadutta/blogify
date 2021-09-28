@@ -33,7 +33,11 @@ const InputTextField: NextPage<InputTextFieldProps> = ({
     <FormControl>
       <FormLabel>{label}</FormLabel>
       <InputGroup>
-        {isLeftAddOn && <InputLeftAddon>{isLeftAddOnValue}</InputLeftAddon>}
+        {isLeftAddOn && (
+          <InputLeftAddon fontWeight="semibold">
+            {isLeftAddOnValue}
+          </InputLeftAddon>
+        )}
         <Input
           // focusBorderColor={color}
           borderColor={color}

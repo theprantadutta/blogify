@@ -3,7 +3,6 @@ import {
   Button,
   Divider,
   Flex,
-  Heading,
   Icon,
   IconButton,
   Popover,
@@ -23,6 +22,7 @@ import { FaUserCircle } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
 import { authAtom } from '../state/authState'
 import { NavButtonLinks } from '../util/types'
+import BlogifySVG from './BlogifySVG'
 // import { useGetUser } from './Layout'
 import PrimaryButton from './PrimaryButton'
 
@@ -35,12 +35,8 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   // const { refetch } = useGetUser()
   return (
     <Flex alignItems="center">
-      <Box>
-        <Link href="/" passHref>
-          <Heading size="xl" color="purple.500" as="h1" cursor="pointer">
-            Blogify
-          </Heading>
-        </Link>
+      <Box onClick={() => router.push('/')}>
+        <BlogifySVG />
       </Box>
       <Spacer />
       <Box my="4">
@@ -49,11 +45,18 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
             {LoggedInLinks.map((link) => {
               return (
                 <PrimaryButton key={link.title}>
-                  <Link href={link.link}>{link.title}</Link>
+                  <Link href={link.link} passHref>
+                    {link.title}
+                  </Link>
                 </PrimaryButton>
               )
             })}
-            <Popover placement="bottom-end" matchWidth>
+            <Popover
+              placement="bottom-end"
+              matchWidth
+              closeOnBlur
+              trigger="hover"
+            >
               <PopoverTrigger>
                 <IconButton
                   marginLeft="2"
@@ -73,11 +76,15 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
                 {/* <PopoverCloseButton /> */}
                 <PopoverBody>
                   <Button textColor="purple.600" my="1">
-                    <Link href={`/edit-profile`}>Edit Profile</Link>
+                    <Link href={`/edit-profile`} passHref>
+                      Edit Profile
+                    </Link>
                   </Button>
                   <Divider />
                   <Button textColor="purple.600" my="1">
-                    <Link href={`/change-password`}>Change Password</Link>
+                    <Link href={`/change-password`} passHref>
+                      Change Password
+                    </Link>
                   </Button>
                   <Divider />
                   <Button
