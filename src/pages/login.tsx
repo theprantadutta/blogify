@@ -1,25 +1,17 @@
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Heading,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Spacer,
-  useToast,
-} from '@chakra-ui/react'
+import { Box, Flex, Heading, Spacer, useToast } from '@chakra-ui/react'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { User } from '@prisma/client'
 import axios from 'axios'
 import { GetServerSideProps } from 'next'
 import { withIronSession } from 'next-iron-session'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
-import React, { ChangeEvent, useState } from 'react'
+import React, { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useSetRecoilState } from 'recoil'
+import * as yup from 'yup'
+import InputPasswordField from '../components/FormFields/InputPasswordField'
+import InputTextField from '../components/FormFields/InputTextField'
 import Layout from '../components/Layout'
 import PrimaryButton from '../components/PrimaryButton'
 import ReactLoader from '../components/ReactLoader'
@@ -38,19 +30,33 @@ type LoginForm = {
 const Login: React.FC<LoginProps> = ({ user }) => {
   const router = useRouter()
   const toast = useToast()
-  const [show, setShow] = useState(false)
   const setAuth = useSetRecoilState(authAtom)
-  const [form, setForm] = useState<LoginForm>({ email: '', password: '' })
-  const [error, setError] = useState<string | null>('')
   const [loading, setLoading] = useState<boolean>(false)
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+
+  const {
+    control,
+    setError,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: yupResolver(
+      yup
+        .object({
+          email: yup.string().email('Invalid email').required(),
+          password: yup.string().min(6).required(),
+        })
+        .required()
+    ),
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
+  })
+
+  const onSubmit = async (values: LoginForm) => {
     setLoading(true)
     try {
-      const { data } = await axios.post('/api/login', form)
+      const { data } = await axios.post('/api/login', values)
       console.log('data: ', data)
       setAuth(data)
-      setError(null)
       toast({
         title: `Welcome, ${data.name}`,
         status: 'success',
@@ -59,58 +65,53 @@ const Login: React.FC<LoginProps> = ({ user }) => {
       })
       return router.push('/')
     } catch (e) {
-      setError(e.response.data.error)
+      setError('email', {
+        type: 'manual',
+        message: e?.response?.data?.error || `Something Went Wrong. Try Again`,
+      })
     } finally {
       setLoading(false)
     }
   }
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+
   return (
     <Layout user={user}>
       <Box width="xl" mx="auto" marginTop="4">
-        <Heading as="h4" fontSize="xl" fontWeight="bold">
+        <Heading my="5" as="h4" fontSize="xl" fontWeight="bold">
           Login to your Account
         </Heading>
-        <form onSubmit={handleSubmit}>
-          <FormControl my="5" id="email">
-            <FormLabel>Email Address</FormLabel>
-            <Input
-              onChange={handleChange}
-              type="email"
-              placeholder="Enter Your Email"
-              fontWeight="semibold"
-              fontSize="md"
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Box my="5">
+            <Controller
               name="email"
+              control={control}
+              defaultValue={''}
+              render={({ field }) => (
+                <InputTextField
+                  error={errors?.email?.message}
+                  label="Enter Your Email"
+                  placeholder="johndoe@gmail.com"
+                  field={field}
+                />
+              )}
             />
-            <FormHelperText
-              fontWeight="semibold"
-              color="red.500"
-              fontStyle="italic"
-            >
-              {error}
-            </FormHelperText>
-          </FormControl>
+          </Box>
 
-          <FormControl my="5" id="password">
-            <FormLabel>Enter Password</FormLabel>
-            <InputGroup size="md">
-              <Input
-                onChange={handleChange}
-                placeholder="Enter Your Password"
-                type={show ? 'text' : 'password'}
-                fontWeight="semibold"
-                fontSize="md"
-                name="password"
-              />
-              <InputRightElement width="4.5rem">
-                <Button h="1.75rem" size="sm" onClick={() => setShow(!show)}>
-                  {show ? 'Hide' : 'Show'}
-                </Button>
-              </InputRightElement>
-            </InputGroup>
-          </FormControl>
+          <Box mt="5">
+            <Controller
+              name="password"
+              control={control}
+              defaultValue={''}
+              render={({ field }) => (
+                <InputPasswordField
+                  error={errors?.password?.message}
+                  label="Enter Your Passsword"
+                  placeholder="Your password here"
+                  field={field}
+                />
+              )}
+            />
+          </Box>
 
           <Flex>
             <PrimaryButton my="5" type="submit" disabled={loading}>

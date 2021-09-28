@@ -37,8 +37,12 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
   const queryClient = useQueryClient()
 
   const isNextPage =
-    queryClient.getQueryData<PostsWithIsNext>(['all-posts', 'all', 1])
+    queryClient.getQueryData<PostsWithIsNext>(['all-posts', 'all', post.id])
       ?.isNextPage || false
+
+  const totalPage =
+    queryClient.getQueryData<PostsWithIsNext>(['all-posts', 'all', post.id])
+      ?.totalPage || 0
 
   const deletePostMutation = useMutation(
     (id: number) => axios.delete('/api/delete-post/' + id),
@@ -66,6 +70,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
         queryClient.setQueryData<PostsWithIsNext>(['all-posts', 'all', 1], {
           posts,
           isNextPage,
+          totalPage,
         })
 
         return { posts, isNextPage }
@@ -73,10 +78,15 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
 
       // If the mutation fails, use the context returned from onMutate to roll back
       onError: (_err, _variables, context) => {
-        if ('posts' in context && 'isNextPage' in context) {
+        if (
+          'posts' in context &&
+          'isNextPage' in context &&
+          'totalPage' in context
+        ) {
           queryClient.setQueryData<PostsWithIsNext>(['all-posts', 'all', 1], {
             posts: context.posts,
             isNextPage,
+            totalPage,
           })
         }
       },

@@ -42,7 +42,7 @@ const EditProfile: NextPage<EditProfileProps> = ({ user }) => {
               'Email already been taken',
               async function (value) {
                 try {
-                  await axios.post('/api/unique-email', {
+                  await axios.post('/api/unique-email-excluding-id', {
                     email: value,
                     id: user.id,
                   })
@@ -150,11 +150,12 @@ const EditProfile: NextPage<EditProfileProps> = ({ user }) => {
             <Controller
               name="mobileNo"
               control={control}
-              defaultValue={(user.mobileNo as any) ?? 0o1}
+              defaultValue={(user.mobileNo as any) ?? ''}
               render={({ field }) => (
                 <InputTextField
                   error={errors?.mobileNo?.message}
                   isLeftAddOn
+                  placeholder="17XXXXXXXX"
                   isLeftAddOnValue="+880"
                   label="Your Mobile No"
                   field={field}

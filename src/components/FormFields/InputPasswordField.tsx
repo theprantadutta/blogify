@@ -25,7 +25,7 @@ const InputPasswordField: NextPage<InputPasswordFieldProps> = ({
   field,
   ...props
 }) => {
-  const color = error ? 'red.500' : 'purple.500'
+  const color = error ? 'red.500' : 'gray.200'
   const [show, setShow] = React.useState(false)
   const handleClick = () => setShow(!show)
   return (

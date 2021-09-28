@@ -4,11 +4,11 @@ import handler, { IRON_SESSION_MIDDLEWARE } from '../../util/handler'
 export default handler()
   .use(IRON_SESSION_MIDDLEWARE)
   .post(async (req, res) => {
-    const { email } = req.body
+    const { id, email } = req.body
 
-    if (!email) {
+    if (!id || !email) {
       return res.status(422).json({
-        error: 'Please Provide an email',
+        error: 'Please Provide id and email',
       })
     }
 
@@ -19,7 +19,7 @@ export default handler()
         },
       })
 
-      if (!user) {
+      if (!user || user.id == id) {
         return res.status(200).json({ OK: 'OK' })
       } else {
         return res.status(422).json({

@@ -23,7 +23,7 @@ import { FaUserCircle } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
 import { authAtom } from '../state/authState'
 import { NavButtonLinks } from '../util/types'
-import { useGetUser } from './Layout'
+// import { useGetUser } from './Layout'
 import PrimaryButton from './PrimaryButton'
 
 interface NavbarProps {}
@@ -32,7 +32,7 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   const toast = useToast()
   const router = useRouter()
   const [auth, setAuth] = useRecoilState(authAtom)
-  const { refetch } = useGetUser()
+  // const { refetch } = useGetUser()
   return (
     <Flex alignItems="center">
       <Box>
@@ -86,7 +86,6 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
                     onClick={async () => {
                       try {
                         await axios.post('/api/logout')
-                        await refetch()
                         setAuth(null)
                         toast({
                           title: `Logout Successful`,

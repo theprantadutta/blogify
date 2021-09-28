@@ -22,7 +22,7 @@ const InputDateField: NextPage<InputDateFieldProps> = ({
   field,
   ...props
 }) => {
-  const color = error ? 'red.500' : 'purple.500'
+  const color = error ? 'red.500' : 'gray.200'
   return (
     <FormControl>
       <FormLabel>{label}</FormLabel>

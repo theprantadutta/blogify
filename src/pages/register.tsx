@@ -1,24 +1,17 @@
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Heading,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Spacer,
-} from '@chakra-ui/react'
+import { Box, Flex, Heading, Spacer } from '@chakra-ui/react'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { User } from '@prisma/client'
 import axios from 'axios'
 import { GetServerSideProps } from 'next'
 import { withIronSession } from 'next-iron-session'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
-import React, { ChangeEvent, useState } from 'react'
+import React, { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useSetRecoilState } from 'recoil'
+import * as yup from 'yup'
+import InputPasswordField from '../components/FormFields/InputPasswordField'
+import InputTextField from '../components/FormFields/InputTextField'
 import Layout from '../components/Layout'
 import PrimaryButton from '../components/PrimaryButton'
 import ReactLoader from '../components/ReactLoader'
@@ -36,33 +29,58 @@ type RegisterForm = {
 }
 
 const Register: React.FC<RegisterProps> = ({ user }) => {
-  const [show, setShow] = useState(false)
   const router = useRouter()
   const setAuth = useSetRecoilState(authAtom)
-  const [form, setForm] = useState<RegisterForm>({
-    name: '',
-    email: '',
-    password: '',
+  const {
+    control,
+    setError,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterForm>({
+    resolver: yupResolver(
+      yup
+        .object({
+          name: yup.string().required(),
+          email: yup
+            .string()
+            .email('Invalid email')
+            .test(
+              'Unique Email',
+              'Email already been taken',
+              async function (value) {
+                try {
+                  await axios.post('/api/unique-email', {
+                    email: value,
+                  })
+                  return true
+                } catch (e) {
+                  return false
+                }
+              }
+            )
+            .required(),
+          password: yup.string().min(6).required(),
+        })
+        .required()
+    ),
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
   })
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (values: RegisterForm) => {
     setLoading(true)
-    console.log(form)
     try {
-      const { data } = await axios.post('/api/register', form)
+      const { data } = await axios.post('/api/register', values)
       setAuth(data)
-      setError(null)
       return router.push('/')
     } catch (e) {
-      setError(e.response.data.error)
+      setError('name', {
+        type: 'manual',
+        message: e?.response?.data?.error || `Something Went Wrong. Try Again`,
+      })
     } finally {
       setLoading(false)
     }
-  }
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
   }
   return (
     <Layout user={user}>
@@ -70,56 +88,54 @@ const Register: React.FC<RegisterProps> = ({ user }) => {
         <Heading as="h4" fontSize="xl" fontWeight="bold">
           Login to your Account
         </Heading>
-        <form onSubmit={handleSubmit}>
-          <FormControl my="5" id="name">
-            <FormLabel>Full Name</FormLabel>
-            <Input
-              onChange={handleChange}
-              type="text"
-              placeholder="Enter Your Name"
-              fontWeight="semibold"
-              fontSize="md"
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Box mt="5">
+            <Controller
               name="name"
+              control={control}
+              defaultValue={''}
+              render={({ field }) => (
+                <InputTextField
+                  error={errors?.name?.message}
+                  label="Enter Your Name"
+                  placeholder="Your Name"
+                  field={field}
+                />
+              )}
             />
-            <FormHelperText
-              fontWeight="semibold"
-              color="red.500"
-              fontStyle="italic"
-            >
-              {error}
-            </FormHelperText>
-          </FormControl>
+          </Box>
 
-          <FormControl my="5" id="email">
-            <FormLabel>Email Address</FormLabel>
-            <Input
-              onChange={handleChange}
-              type="email"
-              placeholder="Enter Your Email"
-              fontWeight="semibold"
-              fontSize="md"
+          <Box my="5">
+            <Controller
               name="email"
+              control={control}
+              defaultValue={''}
+              render={({ field }) => (
+                <InputTextField
+                  error={errors?.email?.message}
+                  label="Enter Your Email"
+                  placeholder="johndoe@gmail.com"
+                  field={field}
+                />
+              )}
             />
-          </FormControl>
+          </Box>
 
-          <FormControl my="5" id="password">
-            <FormLabel>Enter Password</FormLabel>
-            <InputGroup size="md">
-              <Input
-                onChange={handleChange}
-                placeholder="Enter Your Password"
-                type={show ? 'text' : 'password'}
-                fontWeight="semibold"
-                fontSize="md"
-                name="password"
-              />
-              <InputRightElement width="4.5rem">
-                <Button h="1.75rem" size="sm" onClick={() => setShow(!show)}>
-                  {show ? 'Hide' : 'Show'}
-                </Button>
-              </InputRightElement>
-            </InputGroup>
-          </FormControl>
+          <Box mt="5">
+            <Controller
+              name="password"
+              control={control}
+              defaultValue={''}
+              render={({ field }) => (
+                <InputPasswordField
+                  error={errors?.password?.message}
+                  label="Enter Your Passsword"
+                  placeholder="Your password here"
+                  field={field}
+                />
+              )}
+            />
+          </Box>
 
           <Flex>
             <PrimaryButton my="5" type="submit" disabled={loading}>
