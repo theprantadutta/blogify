@@ -1,25 +1,11 @@
-import { Post, User } from '@prisma/client'
-import axios, { AxiosError } from 'axios'
+import { User } from '@prisma/client'
 import { GetServerSideProps } from 'next'
 import React from 'react'
-import { QueryFunction, useQuery, UseQueryOptions } from 'react-query'
+import useSWR from 'swr'
 import Layout from '../../components/Layout'
 import { FullWidthReactLoader } from '../../components/ReactLoader'
 import SinglePost from '../../components/SinglePost'
 import withAuth from '../../HOCs/withAuth'
-
-const getSinglePost: QueryFunction = async (key) => {
-  const postId = key.queryKey[1]
-  const res = await axios.get('/api/single-post/' + postId)
-  return res.data
-}
-
-export function useGetSinglePost<TData = Post>(
-  postId: string,
-  options?: UseQueryOptions<Post, AxiosError, TData>
-) {
-  return useQuery(['all-posts', postId], getSinglePost, options)
-}
 
 interface EditPostProps {
   user: User | null
@@ -27,14 +13,14 @@ interface EditPostProps {
 }
 
 const EditPost: React.FC<EditPostProps> = ({ user, postId }) => {
-  const { data: postData, status } = useGetSinglePost(postId)
+  const { data: postData, error } = useSWR('/single-post/' + postId)
   return (
     <Layout user={user}>
-      {status === 'loading' && <FullWidthReactLoader />}
+      {!postData && !error && <FullWidthReactLoader />}
 
       {postData && <SinglePost post={postData} />}
 
-      {status === 'error' && <p>Post Not Found</p>}
+      {error && <p>Post Not Found</p>}
     </Layout>
   )
 }

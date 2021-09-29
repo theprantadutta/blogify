@@ -1,20 +1,28 @@
 import { Box, ChakraProvider } from '@chakra-ui/react'
+import axios from 'axios'
 import { AnimatePresence, motion, Variants } from 'framer-motion'
 import { AppProps } from 'next/app'
 import NextNprogress from 'nextjs-progressbar'
 import React from 'react'
-import { QueryClient, QueryClientProvider } from 'react-query'
-import { ReactQueryDevtools } from 'react-query/devtools'
 import { RecoilRoot } from 'recoil'
+import { SWRConfig } from 'swr'
 import Navbar from '../components/Navbar'
 import theme from '../theme'
+import { API_URL } from '../util/constants'
 
-const queryClient = new QueryClient()
+axios.defaults.baseURL = API_URL
+
+const fetcher = (url: string) => axios.get(url).then((res) => res.data)
 
 function MyApp({ Component, pageProps, router }: AppProps) {
   return (
     <RecoilRoot>
-      <QueryClientProvider client={queryClient}>
+      <SWRConfig
+        value={{
+          refreshInterval: 30000,
+          fetcher,
+        }}
+      >
         <ChakraProvider resetCSS theme={theme}>
           <NextNprogress
             color="#805AD5"
@@ -32,8 +40,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
             </motion.div>
           </AnimatePresence>
         </ChakraProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      </SWRConfig>
     </RecoilRoot>
   )
 }

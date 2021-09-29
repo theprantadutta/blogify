@@ -1,21 +1,22 @@
-import {
-  Box,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Heading,
-  Input,
-  Textarea,
-  useToast,
-} from '@chakra-ui/react'
+import { Box, Heading, useToast } from '@chakra-ui/react'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { Post } from '@prisma/client'
 import axios from 'axios'
 import { motion } from 'framer-motion'
-import { useRouter } from 'next/dist/client/router'
-import React, { ChangeEvent, useEffect, useState } from 'react'
-import { useMutation, useQueryClient } from 'react-query'
+import { useRouter } from 'next/router'
+import React, { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useRecoilValue } from 'recoil'
+import useSWR, { useSWRConfig } from 'swr'
+import * as yup from 'yup'
 import { authAtom } from '../state/authState'
+import {
+  formVariants,
+  fromTheLeftVariants,
+  fromTheRightVariants,
+} from '../util/variants'
+import { PostsWithIsNext } from './AllPosts'
+import InputTextField from './FormFields/InputTextField'
 import PrimaryButton from './PrimaryButton'
 import ReactLoader from './ReactLoader'
 
@@ -38,165 +39,133 @@ const PostForm: React.FC<PostFormProps> = ({
   operation,
 }) => {
   const toast = useToast()
-  const queryClient = useQueryClient()
   const router = useRouter()
-
   const auth = useRecoilValue(authAtom)
-
-  const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  const [newPostValues, setNewPostValues] = useState<NewPostFormValues>({
-    title: '',
-    content: '',
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<NewPostFormValues>({
+    resolver: yupResolver(
+      yup
+        .object({
+          title: yup.string().min(6).required(),
+          content: yup.string().min(6).required(),
+        })
+        .required()
+    ),
+    defaultValues: {
+      title: post ? post.title : '',
+      content: post ? post.content : '',
+    },
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
   })
 
-  useEffect(() => {
-    if (post) {
-      setNewPostValues({
-        title: post.title,
-        content: post.content,
-      })
-    }
-  }, [post])
-
-  const addPostMutation = useMutation(
-    (newPost) =>
-      axios.post(`/api/${operation}-post`, {
-        ...newPost,
-        userId: auth.id,
-      }),
-    {
-      onSuccess: () => {
-        toast({
-          title: `Post ${operation}d successfully`,
-          status: 'success',
-          position: 'top-right',
-          duration: 9000,
-          isClosable: true,
-        })
-        return router.push('/posts')
-      }, // When mutate is called:
-      onMutate: async (post: Post) => {
-        console.log(`post`, post)
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries('all-posts')
-
-        // Snapshot the previous value
-        const previousPosts = queryClient.getQueryData<Post[]>([
-          'all-posts',
-          'all',
-        ])
-
-        // Optimistically update to the new value
-        if (previousPosts) {
-          queryClient.setQueryData<Post[]>(
-            ['all-posts', 'all'],
-            [...previousPosts, post]
-          )
-        }
-
-        return { previousPosts }
-      },
-      // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (err, variables, context) => {
-        toast({
-          title: `Something Went Wrong, Please Try Again`,
-          status: 'error',
-          position: 'top-right',
-          duration: 9000,
-          isClosable: true,
-        })
-        if (context?.previousPosts) {
-          queryClient.setQueryData<Post[]>(
-            ['all-posts', 'all'],
-            context.previousPosts
-          )
-        }
-
-        setSubmitting(false)
-      },
-      // Always refetch after error or success:
-      onSettled: () => {
-        queryClient.invalidateQueries(['all-posts', 'all'])
-      },
-    }
+  const { data }: { data?: PostsWithIsNext } = useSWR<PostsWithIsNext, any>(
+    '/posts?page=1'
   )
+  const { mutate } = useSWRConfig()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Form Values: ', newPostValues)
-    let upsertPostValues: Post = newPostValues as Post
+  const onSubmit = async (values: NewPostFormValues) => {
+    console.log('Form Values: ', values)
+    let upsertPostValues: Post = values as Post
     if (operation === 'update') {
       upsertPostValues = { ...upsertPostValues, id: post.id }
     }
     setSubmitting(true)
-    addPostMutation.mutate(upsertPostValues)
+
+    let some = { ...data.posts, upsertPostValues }
+    console.log('some: ', some)
+    mutate(
+      '/posts?page=1',
+      {
+        ...data,
+        posts: [...data.posts, { upsertPostValues, id: Math.random() }],
+      },
+      false
+    )
+    router.push('/posts')
+    try {
+      await axios.post(`/${operation}-post`, {
+        ...upsertPostValues,
+        userId: auth.id,
+      })
+      toast({
+        title: `Post ${operation}d successfully`,
+        status: 'success',
+        position: 'top-right',
+        duration: 9000,
+        isClosable: true,
+      })
+    } catch (e) {
+      toast({
+        title: `Something Went Wrong`,
+        status: 'error',
+        position: 'top-right',
+        duration: 9000,
+        isClosable: true,
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setNewPostValues({ ...newPostValues, [e.target.name]: e.target.value })
-  }
   return (
     <Box width="xl" mx="auto" marginTop="4">
       <Heading my="5" as="h4" fontSize="xl" fontWeight="bold">
         {pageTitle}
       </Heading>
 
-      <motion.form
-        initial={{ y: '-100vh' }}
-        animate={{ y: 0 }}
-        transition={{ delay: 0.5, duration: 1 }}
-        onSubmit={handleSubmit}
-      >
-        <FormControl my="5" id="email">
-          <FormLabel>Post Title</FormLabel>
-          <Input
-            defaultValue={newPostValues.title}
-            onChange={handleChange}
-            placeholder="Enter Post Title"
-            fontWeight="semibold"
-            fontSize="md"
-            name="title"
-          />
-          <FormHelperText
-            fontWeight="semibold"
-            color="red.500"
-            fontStyle="italic"
-          >
-            {error}
-          </FormHelperText>
-        </FormControl>
-
-        <FormControl my="5" id="password">
-          <FormLabel>Post Content</FormLabel>
-          <Textarea
-            onChange={handleChange}
-            defaultValue={newPostValues.content}
-            placeholder="Enter Post Content"
-            fontWeight="semibold"
-            fontSize="md"
-            name="content"
-          />
-        </FormControl>
-
-        <motion.div
-          initial={{ opacity: 0, y: '100vh' }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 2 }}
-        >
-          <PrimaryButton
-            disabled={submitting}
-            w="100%"
-            my="5"
-            type="submit"
-            marginX="0"
-          >
-            {submitting ? <ReactLoader /> : buttonName}
-          </PrimaryButton>
+      <motion.form variants={formVariants()} onSubmit={handleSubmit(onSubmit)}>
+        <motion.div variants={fromTheLeftVariants()}>
+          <Box my="2">
+            <Controller
+              name="title"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <InputTextField
+                  error={errors?.title?.message}
+                  placeholder="Enter Title"
+                  label="Enter Post Title"
+                  field={field}
+                />
+              )}
+            />
+          </Box>
         </motion.div>
+
+        <motion.div variants={fromTheRightVariants()}>
+          <Box my="2">
+            <Controller
+              name="content"
+              control={control}
+              defaultValue={''}
+              render={({ field }) => (
+                <InputTextField
+                  error={errors?.content?.message}
+                  label="New Password"
+                  placeholder="Enter New Password"
+                  field={field}
+                />
+              )}
+            />
+          </Box>
+        </motion.div>
+
+        <PrimaryButton
+          disabled={submitting}
+          w="100%"
+          my="5"
+          type="submit"
+          marginX="0"
+        >
+          {submitting ? <ReactLoader /> : buttonName}
+        </PrimaryButton>
       </motion.form>
     </Box>
   )

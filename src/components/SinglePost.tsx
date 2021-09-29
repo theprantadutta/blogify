@@ -20,10 +20,9 @@ import axios from 'axios'
 import { motion } from 'framer-motion'
 import router from 'next/router'
 import React from 'react'
-import { useMutation, useQueryClient } from 'react-query'
 import { useRecoilValue } from 'recoil'
+import useSWR, { useSWRConfig } from 'swr'
 import { authAtom } from '../state/authState'
-import { PostsWithIsNext } from './AllPosts'
 import PrimaryButton from './PrimaryButton'
 
 interface SinglePostProps {
@@ -35,70 +34,8 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
 
-  const queryClient = useQueryClient()
-
-  const isNextPage =
-    queryClient.getQueryData<PostsWithIsNext>(['all-posts', 'all', post.id])
-      ?.isNextPage || false
-
-  const totalPage =
-    queryClient.getQueryData<PostsWithIsNext>(['all-posts', 'all', post.id])
-      ?.totalPage || 0
-
-  const deletePostMutation = useMutation(
-    (id: number) => axios.delete('/api/delete-post/' + id),
-    {
-      onSuccess: () => {
-        toast({
-          title: `Post deleted successfully`,
-          status: 'success',
-          position: 'top-right',
-          duration: 9000,
-          isClosable: true,
-        })
-        return router.push('/posts')
-      },
-      onMutate: async (id: number) => {
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['all-posts', 'all', 1])
-
-        // Snapshot the previous value
-        const posts = queryClient
-          .getQueryData<PostsWithIsNext>(['all-posts', 'all', 1])
-          .posts.filter((post) => post.id !== id)
-
-        // Optimistically update to the new value
-        queryClient.setQueryData<PostsWithIsNext>(['all-posts', 'all', 1], {
-          posts,
-          isNextPage,
-          totalPage,
-        })
-
-        return { posts, isNextPage }
-      },
-
-      // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, _variables, context) => {
-        if (
-          'posts' in context &&
-          'isNextPage' in context &&
-          'totalPage' in context
-        ) {
-          queryClient.setQueryData<PostsWithIsNext>(['all-posts', 'all', 1], {
-            posts: context.posts,
-            isNextPage,
-            totalPage,
-          })
-        }
-      },
-
-      // Always refetch after error or success:
-      onSettled: () => {
-        queryClient.invalidateQueries(['all-posts', 'all', 1])
-      },
-    }
-  )
-
+  const { data } = useSWR('/posts?page=1')
+  const { mutate } = useSWRConfig()
   const ownership = auth?.id === post.userId
 
   return (
@@ -153,9 +90,37 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
 
                 <ModalFooter>
                   <PrimaryButton
-                    onClick={() => {
-                      deletePostMutation.mutate(post.id)
+                    onClick={async () => {
+                      mutate(
+                        '/posts?page=1',
+                        {
+                          ...data,
+                          posts: data.posts.filter((p) => p.id !== post.id),
+                        },
+                        false
+                      )
                       onClose()
+                      router.push('/posts')
+                      try {
+                        await axios.delete('/single-post/' + post.id)
+                        toast({
+                          title: `Post deleted successfully`,
+                          status: 'success',
+                          position: 'top-right',
+                          duration: 9000,
+                          isClosable: true,
+                        })
+                      } catch (e) {
+                        toast({
+                          title: `Something Went Wrong`,
+                          status: 'error',
+                          position: 'top-right',
+                          duration: 9000,
+                          isClosable: true,
+                        })
+                      } finally {
+                        mutate('/posts?page=1')
+                      }
                     }}
                     mr={3}
                   >

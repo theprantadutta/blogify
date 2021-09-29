@@ -1,7 +1,8 @@
+import { Post } from '@prisma/client'
 import prisma from '../../lib/prisma'
 import handler from '../../util/handler'
 
-export default handler().post(async (req, res) => {
+export default handler().get(async (req, res) => {
   const user = req.session.get('user')
 
   if (!user) {
@@ -10,7 +11,7 @@ export default handler().post(async (req, res) => {
     })
   }
 
-  let { page } = req.body
+  let { page, id }: any = req.query
 
   if (!page) {
     return res.status(422).json({
@@ -19,21 +20,39 @@ export default handler().post(async (req, res) => {
   }
 
   page = parseInt(page)
+  id = parseInt(id)
   const take = 3
   let skip = (page - 1) * take
 
+  let posts: Post[] = []
+
   try {
-    const posts = await prisma.post.findMany({
-      take,
-      skip,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        comments: true,
-        likes: true,
-      },
-    })
+    if (Number.isNaN(id)) {
+      posts = await prisma.post.findMany({
+        take,
+        skip,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        include: {
+          comments: true,
+          likes: true,
+        },
+      })
+    } else {
+      posts = await prisma.post.findMany({
+        where: { userId: id },
+        take,
+        skip,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        include: {
+          comments: true,
+          likes: true,
+        },
+      })
+    }
     let postCount = await prisma.post.count()
 
     return res.status(200).json({

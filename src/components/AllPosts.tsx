@@ -20,20 +20,14 @@ import {
   useToast,
 } from '@chakra-ui/react'
 import { Comment, Like, Post } from '@prisma/client'
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { AiFillLike, AiOutlineLike } from 'react-icons/ai'
-import {
-  QueryFunction,
-  useMutation,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-} from 'react-query'
 import { useRecoilValue } from 'recoil'
+import useSWR, { useSWRConfig } from 'swr'
 import { authAtom } from '../state/authState'
 import PrimaryButton from './PrimaryButton'
 import { FullWidthReactLoader } from './ReactLoader'
@@ -49,21 +43,6 @@ export interface PostsWithIsNext {
   totalPage: number
 }
 
-const getPosts: QueryFunction = async (key) => {
-  const postMode = key.queryKey[1]
-  const page = key.queryKey[2]
-  const res = await axios.post(`/api/get-${postMode}-posts`, { page })
-  return res.data
-}
-
-function useGetAllPosts<TData = PostsWithIsNext>(
-  postMode: string,
-  page: number,
-  options?: UseQueryOptions<PostsWithIsNext, AxiosError, TData>
-) {
-  return useQuery(['all-posts', postMode, page], getPosts, options)
-}
-
 interface AllPostsProps {
   initialData: PostsWithIsNext
 }
@@ -71,66 +50,22 @@ interface AllPostsProps {
 const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
   const toast = useToast()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const queryClient = useQueryClient()
   const router = useRouter()
   const auth = useRecoilValue(authAtom)
   const [postMode, setPostMode] = useState<'all' | 'my'>('all')
   const [page, setPage] = useState(1)
 
-  const { data, isLoading, status } = useGetAllPosts(postMode, page, {
-    initialData,
+  const url =
+    postMode === 'all'
+      ? `/posts?page=${page}`
+      : `/posts?page=${page}&id=${auth.id}`
+
+  const { data }: { data?: PostsWithIsNext } = useSWR(url, {
+    fallbackData: initialData,
+    refreshInterval: 1000 * 60 * 5,
   })
 
-  const deletePostMutation = useMutation(
-    (id: number) => axios.delete('/api/single-post/' + id),
-    {
-      onSuccess: () => {
-        toast({
-          title: `Post deleted successfully`,
-          status: 'success',
-          position: 'top-right',
-          duration: 9000,
-          isClosable: true,
-        })
-      },
-      onMutate: async (id: number) => {
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['all-posts', postMode, page])
-
-        // Snapshot the previous value
-        const posts = queryClient
-          .getQueryData<PostsWithIsNext>(['all-posts', postMode, page])
-          .posts.filter((post) => post.id !== id)
-
-        // Optimistically update to the new value
-        queryClient.setQueryData<PostsWithIsNext>(
-          ['all-posts', postMode, page],
-          { posts, isNextPage: data.isNextPage, totalPage: data.totalPage }
-        )
-
-        return { posts, isNextPage: data.isNextPage }
-      },
-
-      // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, _variables, context) => {
-        if ('posts' in context && 'isNextPage' in context) {
-          queryClient.setQueryData<PostsWithIsNext>(
-            ['all-posts', postMode, page],
-            {
-              posts: context?.posts,
-              isNextPage: data?.isNextPage,
-              totalPage: data.totalPage,
-            }
-          )
-        }
-      },
-
-      // Always refetch after error or success:
-      onSettled: () => {
-        queryClient.invalidateQueries(['all-posts', postMode, page])
-      },
-    }
-  )
+  const { mutate } = useSWRConfig()
 
   // to delete the post, as we are using modal,
   // we need another state to control deletable id
@@ -156,7 +91,7 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
       </Flex>
 
       <Heading as="h4">Showing {postMode} posts</Heading>
-      {isLoading && <FullWidthReactLoader />}
+      {!data && <FullWidthReactLoader />}
       {data?.posts &&
         data?.posts.map((post, i) => {
           return (
@@ -255,9 +190,34 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
 
           <ModalFooter>
             <PrimaryButton
-              onClick={() => {
-                deletePostMutation.mutate(postId)
+              onClick={async () => {
+                // update the local data immediately, but disable the revalidation
+                const newPosts = data.posts.filter((post) => {
+                  return post.id !== postId
+                })
+                mutate(url, { ...data, posts: newPosts }, false)
                 onClose()
+                try {
+                  // send a request to the API to update the source
+                  await axios.delete('/single-post/' + postId)
+                  toast({
+                    title: `Post deleted successfully`,
+                    status: 'success',
+                    position: 'top-right',
+                    duration: 9000,
+                    isClosable: true,
+                  })
+                } catch (e) {
+                  toast({
+                    title: `Something Went Wrong`,
+                    status: 'error',
+                    position: 'top-right',
+                    duration: 9000,
+                    isClosable: true,
+                  })
+                }
+                // trigger a revalidation (refetch) to make sure our local data is correct
+                mutate(url)
               }}
               mr={3}
             >
@@ -275,7 +235,7 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
         </Box>
       )}
 
-      {status === 'success' && (
+      {data && (
         <Flex justify="space-between" alignItems="center">
           <motion.div
             initial={{ x: '-100vw' }}

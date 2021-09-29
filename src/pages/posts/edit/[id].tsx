@@ -1,11 +1,11 @@
 import { User } from '@prisma/client'
 import { GetServerSideProps } from 'next'
 import React from 'react'
+import useSWR from 'swr'
 import Layout from '../../../components/Layout'
 import PostForm from '../../../components/PostForm'
 import { FullWidthReactLoader } from '../../../components/ReactLoader'
 import withAuth from '../../../HOCs/withAuth'
-import { useGetSinglePost } from '../[id]'
 
 interface EditPostProps {
   user: User | null
@@ -13,12 +13,12 @@ interface EditPostProps {
 }
 
 const EditPost: React.FC<EditPostProps> = ({ user, postId }) => {
-  const { data: postData, status } = useGetSinglePost(postId)
+  const { data: postData, error } = useSWR('/single-post/' + postId)
   return (
     <Layout user={user}>
-      {status === 'loading' && <FullWidthReactLoader />}
+      {!postData && !error && <FullWidthReactLoader />}
 
-      {status === 'error' && <p>Post Not Found</p>}
+      {error && <p>Post Not Found</p>}
 
       {postData && (
         <PostForm
