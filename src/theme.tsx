@@ -20,8 +20,9 @@ const theme = extendTheme({
   styles: {
     global: {
       'html, body': {
-        overflowX: 'hidden',
-        overflowY: 'hidden',
+        // overflowX: 'hidden',
+        // overflowY: 'scroll',
+        overflow: 'hidden',
       },
     },
   },

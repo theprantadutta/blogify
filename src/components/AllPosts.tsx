@@ -1,6 +1,8 @@
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import {
   Box,
+  Center,
+  Divider,
   Flex,
   Heading,
   IconButton,
@@ -15,28 +17,34 @@ import {
   Spacer,
   Text,
   useDisclosure,
-  useToast
+  useToast,
 } from '@chakra-ui/react'
-import { Post } from '@prisma/client'
+import { Comment, Like, Post } from '@prisma/client'
 import axios, { AxiosError } from 'axios'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import { AiFillLike, AiOutlineLike } from 'react-icons/ai'
 import {
   QueryFunction,
   useMutation,
   useQuery,
   useQueryClient,
-  UseQueryOptions
+  UseQueryOptions,
 } from 'react-query'
 import { useRecoilValue } from 'recoil'
 import { authAtom } from '../state/authState'
 import PrimaryButton from './PrimaryButton'
 import { FullWidthReactLoader } from './ReactLoader'
 
+interface ExtendedPost extends Post {
+  comments: Comment[]
+  likes: Like[]
+}
+
 export interface PostsWithIsNext {
-  posts: Post[]
+  posts: ExtendedPost[]
   isNextPage: boolean
   totalPage: number
 }
@@ -129,11 +137,11 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
   const [postId, setPostId] = useState(0)
 
   return (
-    <Box my="5">
+    <Box marginTop="2">
       <Flex alignItems="center">
         <Select
           w="50%"
-          my="5"
+          my="2"
           fontWeight="semibold"
           defaultValue="all"
           onChange={(e) => setPostMode(e.target.value as 'all' | 'my')}
@@ -158,7 +166,7 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
               transition={{ delay: 0.5 * i, duration: 0.8, stiffness: 120 }}
               key={post.id}
             >
-              <Box my="2" overflow="hidden">
+              <Box overflow="hidden">
                 <Flex alignItems="center">
                   <Link passHref href={`/posts/${post.id}`}>
                     <Text
@@ -206,6 +214,29 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
                 <Text isTruncated as="p" my="2">
                   {post.content}
                 </Text>
+                <Flex justify="start" alignItems="center">
+                  <IconButton
+                    bg="transparent"
+                    _hover={{ bg: 'transparent' }}
+                    _focus={{ bg: 'transparent' }}
+                    _active={{ bg: 'transparent' }}
+                    aria-label="Like Button"
+                    icon={
+                      i === 1 ? (
+                        <AiOutlineLike style={{ color: 'purple' }} />
+                      ) : (
+                        <AiFillLike style={{ color: 'purple' }} />
+                      )
+                    }
+                  />
+                  <Text as="p">{post.likes?.length ?? 0} Likes</Text>
+                  <Center height="10px">
+                    <Divider orientation="vertical" />
+                  </Center>
+                  <Text as="p" marginLeft="5">
+                    {post.comments?.length ?? 0} Comments
+                  </Text>
+                </Flex>
               </Box>
             </motion.div>
           )
@@ -252,6 +283,7 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
             transition={{ delay: 1, duration: 2 }}
           >
             <PrimaryButton
+              marginX="0"
               disabled={page === 1}
               onClick={() => setPage(Math.max(page - 1, 1))}
             >
@@ -273,6 +305,7 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
             transition={{ delay: 1, duration: 2 }}
           >
             <PrimaryButton
+              marginX="0"
               disabled={!data?.isNextPage}
               onClick={() => setPage(page + 1)}
             >

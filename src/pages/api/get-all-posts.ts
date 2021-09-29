@@ -29,6 +29,10 @@ export default handler().post(async (req, res) => {
       orderBy: {
         createdAt: 'desc',
       },
+      include: {
+        comments: true,
+        likes: true,
+      },
     })
     let postCount = await prisma.post.count()
 
@@ -40,7 +44,7 @@ export default handler().post(async (req, res) => {
     })
   } catch (e) {
     return res.status(422).json({
-      error: 'Something Went Wrong',
+      error: e,
     })
   }
 })

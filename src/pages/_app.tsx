@@ -23,7 +23,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
             height={3}
             options={{ easing: 'ease', speed: 500, showSpinner: true }}
           />
-          <Box maxWidth="4xl" marginX="auto" marginTop="10">
+          <Box maxWidth="4xl" marginX="auto" marginTop="2">
             <Navbar />
           </Box>
           <AnimatePresence exitBeforeEnter>
