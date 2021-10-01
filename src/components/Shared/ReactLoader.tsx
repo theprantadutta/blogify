@@ -1,4 +1,5 @@
 import { LoaderProvider, ThreeDots, useLoading } from '@agney/react-loading'
+import { Box } from '@chakra-ui/react'
 import React, { ReactElement } from 'react'
 import PrimaryButton from './PrimaryButton'
 
@@ -7,9 +8,13 @@ function App({ loadingText = '' }) {
     loading: true,
   })
   return (
-    <section className="p-1.5 flex justify-center" {...containerProps}>
+    <Box
+      className="p-1.5 flex justify-center"
+      {...containerProps}
+      fontWeight="semibold"
+    >
       {loadingText} {indicatorEl}
-    </section>
+    </Box>
   )
 }
 
@@ -33,8 +38,8 @@ const ReactLoader: React.FC<ReactLoaderProps> = ({
 
 export default ReactLoader
 
-export const FullWidthReactLoader = ({ loadingText = '' }) => (
+export const FullWidthReactLoader = () => (
   <PrimaryButton disabled shadow="2xl" width="full" my="2" marginX="0">
-    <ReactLoader loadingText={loadingText} />
+    <ReactLoader />
   </PrimaryButton>
 )

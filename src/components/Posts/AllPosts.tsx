@@ -76,9 +76,7 @@ const AllPosts: React.FC<AllPostsProps> = () => {
       </Flex>
 
       <Heading as="h4">Showing {postMode} posts</Heading>
-      {!data && !error && (
-        <FullWidthReactLoader loadingText={'Loading Text....'} />
-      )}
+      {!data && !error && <FullWidthReactLoader />}
       {data?.posts &&
         data?.posts.map((post, index) => {
           let isLiked = false

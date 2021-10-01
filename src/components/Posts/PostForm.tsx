@@ -78,8 +78,6 @@ const PostForm: React.FC<PostFormProps> = ({
     }
     setSubmitting(true)
 
-    let some = { ...data.posts, upsertPostValues }
-    console.log('some: ', some)
     mutate(
       '/posts?page=1',
       {
