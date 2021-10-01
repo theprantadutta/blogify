@@ -8,3 +8,10 @@ export function validateEmail(email: string) {
 
 export const eighteenYearsBackFromNow = (formatter: string) =>
   dayjs().subtract(18, 'year').format(formatter)
+
+export const detectPluralOrSingular = (unit: number, word: string) => {
+  if (unit === 1) {
+    return unit.toString() + ' ' + word
+  }
+  return unit.toString() + ' ' + word + 's'
+}

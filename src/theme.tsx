@@ -22,7 +22,7 @@ const theme = extendTheme({
       'html, body': {
         // overflowX: 'hidden',
         // overflowY: 'scroll',
-        overflow: 'hidden',
+        // overflow: 'scroll',
       },
     },
   },

@@ -35,12 +35,11 @@ model Post {
 }
 
 model Like {
-  id      Int    @id @default(autoincrement())
-  content String @db.VarChar(255)
-  userId  Int
-  postId  Int
-  user    User   @relation(fields: [userId], references: [id])
-  post    Post   @relation(fields: [postId], references: [id])
+  id     Int  @id @default(autoincrement())
+  userId Int
+  postId Int
+  user   User @relation(fields: [userId], references: [id])
+  post   Post @relation(fields: [postId], references: [id])
 }
 
 model Comment {
@@ -50,4 +49,5 @@ model Comment {
   postId  Int
   user    User   @relation(fields: [userId], references: [id])
   post    Post   @relation(fields: [postId], references: [id])
+  createdAt DateTime  @default(now()) @db.Timestamp(6) 
 }

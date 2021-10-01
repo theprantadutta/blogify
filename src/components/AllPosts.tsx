@@ -19,8 +19,9 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react'
-import { Comment, Like, Post } from '@prisma/client'
 import axios from 'axios'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
@@ -29,13 +30,10 @@ import { AiFillLike, AiOutlineLike } from 'react-icons/ai'
 import { useRecoilValue } from 'recoil'
 import useSWR, { useSWRConfig } from 'swr'
 import { authAtom } from '../state/authState'
+import { detectPluralOrSingular } from '../util/functions'
+import { ExtendedPost } from '../util/types'
 import PrimaryButton from './PrimaryButton'
 import { FullWidthReactLoader } from './ReactLoader'
-
-interface ExtendedPost extends Post {
-  comments: Comment[]
-  likes: Like[]
-}
 
 export interface PostsWithIsNext {
   posts: ExtendedPost[]
@@ -43,11 +41,9 @@ export interface PostsWithIsNext {
   totalPage: number
 }
 
-interface AllPostsProps {
-  initialData: PostsWithIsNext
-}
+interface AllPostsProps {}
 
-const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
+const AllPosts: React.FC<AllPostsProps> = () => {
   const toast = useToast()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const router = useRouter()
@@ -58,10 +54,9 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
   const url =
     postMode === 'all'
       ? `/posts?page=${page}`
-      : `/posts?page=${page}&id=${auth.id}`
+      : `/posts?page=${page}&id=${auth?.id}`
 
-  const { data }: { data?: PostsWithIsNext } = useSWR(url, {
-    fallbackData: initialData,
+  const { data, error }: { data?: PostsWithIsNext; error?: any } = useSWR(url, {
     refreshInterval: 1000 * 60 * 5,
   })
 
@@ -70,6 +65,8 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
   // to delete the post, as we are using modal,
   // we need another state to control deletable id
   const [postId, setPostId] = useState(0)
+
+  dayjs.extend(relativeTime)
 
   return (
     <Box marginTop="2">
@@ -91,14 +88,23 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
       </Flex>
 
       <Heading as="h4">Showing {postMode} posts</Heading>
-      {!data && <FullWidthReactLoader />}
+      {!data && !error && (
+        <FullWidthReactLoader loadingText={'Loading Text....'} />
+      )}
       {data?.posts &&
-        data?.posts.map((post, i) => {
+        data?.posts.map((post, index) => {
+          let isLiked = false
+          for (let i = 0; i < post?.likes?.length; i++) {
+            if (post?.likes[i]?.userId === auth?.id) {
+              isLiked = true
+              break
+            }
+          }
           return (
             <motion.div
-              initial={{ x: i % 2 === 0 ? '-100vw' : '100vw' }}
+              initial={{ x: index % 2 === 0 ? '-100vw' : '100vw' }}
               animate={{ x: 0 }}
-              transition={{ delay: 0.5 * i, duration: 0.8, stiffness: 120 }}
+              transition={{ delay: 0.5 * index, duration: 0.8, stiffness: 120 }}
               key={post.id}
             >
               <Box overflow="hidden">
@@ -157,19 +163,105 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
                     _active={{ bg: 'transparent' }}
                     aria-label="Like Button"
                     icon={
-                      i === 1 ? (
-                        <AiOutlineLike style={{ color: 'purple' }} />
-                      ) : (
+                      isLiked ? (
                         <AiFillLike style={{ color: 'purple' }} />
+                      ) : (
+                        <AiOutlineLike style={{ color: 'purple' }} />
                       )
                     }
+                    onClick={async () => {
+                      if (isLiked) {
+                        let newPosts: ExtendedPost[] = []
+                        let likeId: number
+                        data.posts.forEach((p) => {
+                          if (p.id === post.id) {
+                            newPosts.push({
+                              ...p,
+                              likes: p.likes.filter((like) => {
+                                if (like.userId === auth?.id) {
+                                  likeId = like.id
+                                  return false
+                                }
+                                return true
+                              }),
+                            })
+                          } else {
+                            newPosts.push(p)
+                          }
+                        })
+                        mutate(
+                          url,
+                          {
+                            ...data,
+                            posts: newPosts,
+                          },
+                          false
+                        )
+                        await axios.get(`/unlike-post/?id=${likeId}`)
+                        mutate(url)
+                      } else {
+                        let newPosts: ExtendedPost[] = []
+                        data.posts.forEach((p) => {
+                          if (p.id === post.id) {
+                            newPosts.push({
+                              ...p,
+                              likes: [
+                                ...p.likes,
+                                {
+                                  id: Math.floor(Math.random() * 100),
+                                  userId: auth?.id,
+                                  postId: post.id,
+                                },
+                              ],
+                            })
+                          } else {
+                            newPosts.push(p)
+                          }
+                        })
+                        mutate(
+                          url,
+                          {
+                            ...data,
+                            posts: newPosts,
+                          },
+                          false
+                        )
+                        await axios.get(
+                          `/like-post/?postId=${post.id}&userId=${auth?.id}`
+                        )
+                        mutate(url)
+                      }
+                    }}
                   />
-                  <Text as="p">{post.likes?.length ?? 0} Likes</Text>
+                  <Text as="p" fontWeight="semibold">
+                    {detectPluralOrSingular(post?.likes?.length ?? 0, 'Like')}
+                  </Text>
                   <Center height="10px">
                     <Divider orientation="vertical" />
                   </Center>
-                  <Text as="p" marginLeft="5">
-                    {post.comments?.length ?? 0} Comments
+                  <Text
+                    as="p"
+                    marginLeft="5"
+                    fontWeight="semibold"
+                    _hover={{
+                      fontWeight: 'bold',
+                      color: 'purple.500',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => router.push(`/posts/${post.id}#comments`)}
+                  >
+                    <Text ml="3" as="span" fontWeight="semibold">
+                      {detectPluralOrSingular(
+                        post.comments?.length ?? 0,
+                        'Comment'
+                      )}
+                    </Text>
+                  </Text>
+                  <Center height="10px">
+                    <Divider orientation="vertical" />
+                  </Center>
+                  <Text marginLeft="5" as="p" fontWeight="medium">
+                    {dayjs(post.createdAt).fromNow()}
                   </Text>
                 </Flex>
               </Box>
@@ -227,10 +319,18 @@ const AllPosts: React.FC<AllPostsProps> = ({ initialData }) => {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      {data?.posts.length === 0 && (
+      {data?.posts?.length === 0 && (
         <Box my="2">
           <Text as="p" fontSize="xl" fontWeight="semibold" my="5">
             No Posts Yet
+          </Text>
+        </Box>
+      )}
+
+      {error && (
+        <Box my="2">
+          <Text as="p" fontSize="xl" fontWeight="semibold" my="5">
+            Something Went Wrong. Try Again Later
           </Text>
         </Box>
       )}

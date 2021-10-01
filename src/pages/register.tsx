@@ -76,7 +76,7 @@ const Register: React.FC<RegisterProps> = ({ user }) => {
   const onSubmit = async (values: RegisterForm) => {
     setLoading(true)
     try {
-      const { data } = await axios.post('/api/register', values)
+      const { data } = await axios.post('/register', values)
       setAuth(data)
       return router.push('/')
     } catch (e) {

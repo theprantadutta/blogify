@@ -35,7 +35,11 @@ function MyApp({ Component, pageProps, router }: AppProps) {
             <Navbar />
           </Box>
           <AnimatePresence exitBeforeEnter>
-            <motion.div key={router.route} {...pageMotionProps}>
+            <motion.div
+              style={{ overflow: 'hidden' }}
+              key={router.route}
+              {...pageMotionProps}
+            >
               <Component {...pageProps} />
             </motion.div>
           </AnimatePresence>

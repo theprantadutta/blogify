@@ -1,3 +1,4 @@
+import { Comment, Like, Post } from '@prisma/client'
 import { NextApiRequest } from 'next'
 import { Session } from 'next-iron-session'
 
@@ -8,4 +9,9 @@ export type ExtendedApiRequest = NextApiRequest & {
 export type NavButtonLinks = {
   title: string
   link: string
+}
+
+export interface ExtendedPost extends Post {
+  comments: Comment[]
+  likes: Like[]
 }

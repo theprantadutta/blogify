@@ -23,6 +23,10 @@ export default handler()
         where: {
           id,
         },
+        include: {
+          // comments: true,
+          likes: true,
+        },
       })
       return res.status(200).json(post)
     } catch (e) {

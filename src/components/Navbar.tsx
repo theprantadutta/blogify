@@ -17,7 +17,7 @@ import {
 import axios from 'axios'
 import { useRouter } from 'next/dist/client/router'
 import Link from 'next/link'
-import React from 'react'
+import React, { useState } from 'react'
 import { FaUserCircle } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
 import { authAtom } from '../state/authState'
@@ -25,6 +25,7 @@ import { NavButtonLinks } from '../util/types'
 import BlogifySVG from './BlogifySVG'
 // import { useGetUser } from './Layout'
 import PrimaryButton from './PrimaryButton'
+import ReactLoader from './ReactLoader'
 
 interface NavbarProps {}
 
@@ -32,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   const toast = useToast()
   const router = useRouter()
   const [auth, setAuth] = useRecoilState(authAtom)
-  // const { refetch } = useGetUser()
+  const [loading, setLoading] = useState(false)
   return (
     <Flex alignItems="center">
       <Box onClick={() => router.push('/')}>
@@ -91,9 +92,9 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
                     textColor="purple.600"
                     my="2"
                     onClick={async () => {
+                      setLoading(true)
                       try {
-                        await axios.post('/api/logout')
-                        setAuth(null)
+                        await axios.post('/logout')
                         toast({
                           title: `Logout Successful`,
                           variant: 'left-accent',
@@ -101,13 +102,16 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
                           position: 'top-right',
                           isClosable: true,
                         })
-                        await router.push('/')
+                        setAuth(null)
+                        router.push('/')
                       } catch (e) {
                         console.log('Error in Logging Out', e.response)
+                      } finally {
+                        setLoading(false)
                       }
                     }}
                   >
-                    Logout
+                    {loading ? <ReactLoader /> : 'Logout'}
                   </Button>
                 </PopoverBody>
               </PopoverContent>

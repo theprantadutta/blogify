@@ -21,7 +21,7 @@ import { NEXT_IRON_SESSION_CONFIG } from '../util/constants'
 import {
   fromTheBottomVariants,
   fromTheLeftVariants,
-  fromTheRightVariants,
+  fromTheRightVariants
 } from '../util/variants'
 
 interface LoginProps {
@@ -60,7 +60,7 @@ const Login: React.FC<LoginProps> = ({ user }) => {
   const onSubmit = async (values: LoginForm) => {
     setLoading(true)
     try {
-      const { data } = await axios.post('/api/login', values)
+      const { data } = await axios.post('/login', values)
       console.log('data: ', data)
       setAuth(data)
       toast({
