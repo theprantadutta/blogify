@@ -2,9 +2,9 @@ import { User } from '@prisma/client'
 import { GetServerSideProps } from 'next'
 import React from 'react'
 import useSWR from 'swr'
-import Layout from '../../components/Layout'
-import { FullWidthReactLoader } from '../../components/ReactLoader'
-import SinglePost from '../../components/SinglePost'
+import Layout from '../../components/Layouts/Layout'
+import SinglePost from '../../components/Posts/SinglePost'
+import { FullWidthReactLoader } from '../../components/Shared/ReactLoader'
 import withAuth from '../../HOCs/withAuth'
 
 interface EditPostProps {

@@ -9,9 +9,9 @@ import React, { ReactNode, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import InputPasswordField from '../components/FormFields/InputPasswordField'
-import Layout from '../components/Layout'
-import PrimaryButton from '../components/PrimaryButton'
-import ReactLoader from '../components/ReactLoader'
+import Layout from '../components/Layouts/Layout'
+import PrimaryButton from '../components/Shared/PrimaryButton'
+import ReactLoader from '../components/Shared/ReactLoader'
 import withAuth from '../HOCs/withAuth'
 import {
   formVariants,

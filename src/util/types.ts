@@ -15,3 +15,9 @@ export interface ExtendedPost extends Post {
   comments: Comment[]
   likes: Like[]
 }
+
+export interface PostsWithIsNext {
+  posts: ExtendedPost[]
+  isNextPage: boolean
+  totalPage: number
+}

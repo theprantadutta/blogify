@@ -6,7 +6,7 @@ import NextNprogress from 'nextjs-progressbar'
 import React from 'react'
 import { RecoilRoot } from 'recoil'
 import { SWRConfig } from 'swr'
-import Navbar from '../components/Navbar'
+import Navbar from '../components/Shared/Navbar'
 import theme from '../theme'
 import { API_URL } from '../util/constants'
 

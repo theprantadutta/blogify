@@ -18,8 +18,8 @@ export const FEATURES = [
 export const NEXT_IRON_SESSION_CONFIG: SessionOptions = {
   cookieName: 'blogify',
   password: process.env.SECRET_COOKIE_PASSWORD,
-  // if your localhost is served on http:// then disable the secure flag
   cookieOptions: {
+    maxAge: 1 * 60 * 60 * 24,
     secure: IS_PRODUCTION,
     sameSite: 'strict',
     httpOnly: true,

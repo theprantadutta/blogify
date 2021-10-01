@@ -35,8 +35,14 @@ export default handler().get(async (req, res) => {
           createdAt: 'desc',
         },
         include: {
-          comments: true,
-          likes: true,
+          _count: {
+            select: { comments: true },
+          },
+          likes: {
+            select: {
+              userId: true,
+            },
+          },
         },
       })
     } else {
@@ -48,8 +54,14 @@ export default handler().get(async (req, res) => {
           createdAt: 'desc',
         },
         include: {
-          comments: true,
-          likes: true,
+          _count: {
+            select: { comments: true },
+          },
+          likes: {
+            select: {
+              userId: true,
+            },
+          },
         },
       })
     }

@@ -13,15 +13,15 @@ import { useSetRecoilState } from 'recoil'
 import * as yup from 'yup'
 import InputPasswordField from '../components/FormFields/InputPasswordField'
 import InputTextField from '../components/FormFields/InputTextField'
-import Layout from '../components/Layout'
-import PrimaryButton from '../components/PrimaryButton'
-import ReactLoader from '../components/ReactLoader'
+import Layout from '../components/Layouts/Layout'
+import PrimaryButton from '../components/Shared/PrimaryButton'
+import ReactLoader from '../components/Shared/ReactLoader'
 import { authAtom } from '../state/authState'
 import { NEXT_IRON_SESSION_CONFIG } from '../util/constants'
 import {
   fromTheBottomVariants,
   fromTheLeftVariants,
-  fromTheRightVariants
+  fromTheRightVariants,
 } from '../util/variants'
 
 interface LoginProps {

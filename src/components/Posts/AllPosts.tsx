@@ -6,13 +6,6 @@ import {
   Flex,
   Heading,
   IconButton,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Select,
   Spacer,
   Text,
@@ -29,17 +22,12 @@ import React, { useState } from 'react'
 import { AiFillLike, AiOutlineLike } from 'react-icons/ai'
 import { useRecoilValue } from 'recoil'
 import useSWR, { useSWRConfig } from 'swr'
-import { authAtom } from '../state/authState'
-import { detectPluralOrSingular } from '../util/functions'
-import { ExtendedPost } from '../util/types'
-import PrimaryButton from './PrimaryButton'
-import { FullWidthReactLoader } from './ReactLoader'
-
-export interface PostsWithIsNext {
-  posts: ExtendedPost[]
-  isNextPage: boolean
-  totalPage: number
-}
+import { authAtom } from '../../state/authState'
+import { detectPluralOrSingular } from '../../util/functions'
+import { ExtendedPost, PostsWithIsNext } from '../../util/types'
+import DeleteModal from '../Shared/DeleteModal'
+import PrimaryButton from '../Shared/PrimaryButton'
+import { FullWidthReactLoader } from '../Shared/ReactLoader'
 
 interface AllPostsProps {}
 
@@ -252,7 +240,7 @@ const AllPosts: React.FC<AllPostsProps> = () => {
                   >
                     <Text ml="3" as="span" fontWeight="semibold">
                       {detectPluralOrSingular(
-                        post.comments?.length ?? 0,
+                        (post as any)?._count?.comments ?? 0,
                         'Comment'
                       )}
                     </Text>
@@ -269,56 +257,39 @@ const AllPosts: React.FC<AllPostsProps> = () => {
           )
         })}
 
-      <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader fontSize="2xl" fontWeight="bold">
-            Delete A Post
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody fontSize="xl" fontWeight="bold" pb={6}>
-            You are Deleting a Post. Are You Sure?
-          </ModalBody>
-
-          <ModalFooter>
-            <PrimaryButton
-              onClick={async () => {
-                // update the local data immediately, but disable the revalidation
-                const newPosts = data.posts.filter((post) => {
-                  return post.id !== postId
-                })
-                mutate(url, { ...data, posts: newPosts }, false)
-                onClose()
-                try {
-                  // send a request to the API to update the source
-                  await axios.delete('/single-post/' + postId)
-                  toast({
-                    title: `Post deleted successfully`,
-                    status: 'success',
-                    position: 'top-right',
-                    duration: 9000,
-                    isClosable: true,
-                  })
-                } catch (e) {
-                  toast({
-                    title: `Something Went Wrong`,
-                    status: 'error',
-                    position: 'top-right',
-                    duration: 9000,
-                    isClosable: true,
-                  })
-                }
-                // trigger a revalidation (refetch) to make sure our local data is correct
-                mutate(url)
-              }}
-              mr={3}
-            >
-              Go Ahead
-            </PrimaryButton>
-            <PrimaryButton onClick={onClose}>Not Sure</PrimaryButton>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <DeleteModal
+        onClose={onClose}
+        isOpen={isOpen}
+        onClick={async () => {
+          // update the local data immediately, but disable the revalidation
+          const newPosts = data.posts.filter((post) => {
+            return post.id !== postId
+          })
+          mutate(url, { ...data, posts: newPosts }, false)
+          onClose()
+          try {
+            // send a request to the API to update the source
+            await axios.delete('/single-post/' + postId)
+            toast({
+              title: `Post deleted successfully`,
+              status: 'success',
+              position: 'top-right',
+              duration: 9000,
+              isClosable: true,
+            })
+          } catch (e) {
+            toast({
+              title: `Something Went Wrong`,
+              status: 'error',
+              position: 'top-right',
+              duration: 9000,
+              isClosable: true,
+            })
+          }
+          // trigger a revalidation (refetch) to make sure our local data is correct
+          mutate(url)
+        }}
+      />
       {data?.posts?.length === 0 && (
         <Box my="2">
           <Text as="p" fontSize="xl" fontWeight="semibold" my="5">

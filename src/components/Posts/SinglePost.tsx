@@ -5,13 +5,6 @@ import {
   Flex,
   IconButton,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Stack,
   Text,
   useDisclosure,
@@ -27,10 +20,11 @@ import React, { useEffect, useState } from 'react'
 import { AiFillLike, AiOutlineLike } from 'react-icons/ai'
 import { useRecoilValue } from 'recoil'
 import useSWR, { useSWRConfig } from 'swr'
-import { authAtom } from '../state/authState'
-import { detectPluralOrSingular } from '../util/functions'
-import { ExtendedPost } from '../util/types'
-import PrimaryButton from './PrimaryButton'
+import { authAtom } from '../../state/authState'
+import { detectPluralOrSingular } from '../../util/functions'
+import { ExtendedPost } from '../../util/types'
+import DeleteModal from '../Shared/DeleteModal'
+import PrimaryButton from '../Shared/PrimaryButton'
 
 interface SinglePostProps {
   post: ExtendedPost
@@ -88,7 +82,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
         name: auth?.name,
       },
     }
-    mutate(commentsUrl, [...comments, newComment], false)
+    mutate(commentsUrl, [newComment, ...comments], false)
     await axios.post('/comments', newComment)
     mutate(commentsUrl)
   }
@@ -130,61 +124,43 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
               icon={<DeleteIcon />}
               onClick={onOpen}
             />
-            <Modal
-              closeOnOverlayClick={false}
-              isOpen={isOpen}
-              onClose={onClose}
-            >
-              <ModalOverlay />
-              <ModalContent>
-                <ModalHeader>Delete A Post</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody fontSize="xl" fontWeight="bold" pb={6}>
-                  You are Deleting a Post. Are You Sure?
-                </ModalBody>
 
-                <ModalFooter>
-                  <PrimaryButton
-                    onClick={async () => {
-                      mutate(
-                        '/posts?page=1',
-                        {
-                          ...data,
-                          posts: data.posts.filter((p) => p.id !== post.id),
-                        },
-                        false
-                      )
-                      onClose()
-                      router.push('/posts')
-                      try {
-                        await axios.delete('/single-post/' + post.id)
-                        toast({
-                          title: `Post deleted successfully`,
-                          status: 'success',
-                          position: 'top-right',
-                          duration: 9000,
-                          isClosable: true,
-                        })
-                      } catch (e) {
-                        toast({
-                          title: `Something Went Wrong`,
-                          status: 'error',
-                          position: 'top-right',
-                          duration: 9000,
-                          isClosable: true,
-                        })
-                      } finally {
-                        mutate('/posts?page=1')
-                      }
-                    }}
-                    mr={3}
-                  >
-                    Go Ahead
-                  </PrimaryButton>
-                  <PrimaryButton onClick={onClose}>Not Sure</PrimaryButton>
-                </ModalFooter>
-              </ModalContent>
-            </Modal>
+            <DeleteModal
+              onClose={onClose}
+              isOpen={isOpen}
+              onClick={async () => {
+                mutate(
+                  '/posts?page=1',
+                  {
+                    ...data,
+                    posts: data.posts.filter((p) => p.id !== post.id),
+                  },
+                  false
+                )
+                onClose()
+                router.push('/posts')
+                try {
+                  await axios.delete('/single-post/' + post.id)
+                  toast({
+                    title: `Post deleted successfully`,
+                    status: 'success',
+                    position: 'top-right',
+                    duration: 9000,
+                    isClosable: true,
+                  })
+                } catch (e) {
+                  toast({
+                    title: `Something Went Wrong`,
+                    status: 'error',
+                    position: 'top-right',
+                    duration: 9000,
+                    isClosable: true,
+                  })
+                } finally {
+                  mutate('/posts?page=1')
+                }
+              }}
+            />
           </Box>
         )}
       </Flex>
@@ -279,10 +255,19 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
           </Box>
         </form>
         {comments?.length > 0 ? (
-          <Box>
-            {comments.map((comment) => {
-              return (
-                <Box ml="2" my="5" key={comment.id}>
+          comments.map((comment, index) => {
+            return (
+              <motion.div
+                initial={{ x: index % 2 === 0 ? '-100vw' : '100vw' }}
+                animate={{ x: 0 }}
+                transition={{
+                  delay: 0.5 * index,
+                  duration: 0.8,
+                  stiffness: 120,
+                }}
+                key={comment.id}
+              >
+                <Box ml="2" my="5">
                   <Flex alignItems="center" gridGap="5" style={{ height: 50 }}>
                     <Image
                       src={`https://ui-avatars.com/api/?name=${comment.user.name}&background=random`}
@@ -303,9 +288,9 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
                     </Stack>
                   </Flex>
                 </Box>
-              )
-            })}
-          </Box>
+              </motion.div>
+            )
+          })
         ) : (
           <Text fontWeight="semibold" ml="2" my={2}>
             No Comments Yet

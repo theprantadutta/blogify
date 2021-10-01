@@ -2,7 +2,7 @@ import { Box } from '@chakra-ui/react'
 import { User } from '@prisma/client'
 import React, { useEffect } from 'react'
 import { useRecoilState } from 'recoil'
-import { authAtom } from '../state/authState'
+import { authAtom } from '../../state/authState'
 
 interface LayoutProps {
   user: User

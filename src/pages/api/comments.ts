@@ -21,6 +21,9 @@ export default handler()
         where: {
           postId,
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
         include: {
           user: {
             select: {

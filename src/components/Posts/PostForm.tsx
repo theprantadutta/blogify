@@ -9,16 +9,16 @@ import { Controller, useForm } from 'react-hook-form'
 import { useRecoilValue } from 'recoil'
 import useSWR, { useSWRConfig } from 'swr'
 import * as yup from 'yup'
-import { authAtom } from '../state/authState'
+import { authAtom } from '../../state/authState'
+import { PostsWithIsNext } from '../../util/types'
 import {
   formVariants,
   fromTheLeftVariants,
   fromTheRightVariants,
-} from '../util/variants'
-import { PostsWithIsNext } from './AllPosts'
-import InputTextField from './FormFields/InputTextField'
-import PrimaryButton from './PrimaryButton'
-import ReactLoader from './ReactLoader'
+} from '../../util/variants'
+import InputTextField from '../FormFields/InputTextField'
+import PrimaryButton from '../Shared/PrimaryButton'
+import ReactLoader from '../Shared/ReactLoader'
 
 interface PostFormProps {
   post?: Post
