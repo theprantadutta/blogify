@@ -6,14 +6,16 @@
 
 - ✅ User Authentication
 - ✅ Post CRUD with Prisma
-- ✅ Optimistic Updates and Caching with React Query
+- ✅ Optimistic Updates and Caching with SWR
 - ✅ Popup and Modal with chakra ui
 - ✅ Update Profile and Change Password
+- ✅ Users can like and comment on a Post
 
 ### Stacks used in this projects
 
 - NextJS (duh..)
 - Chakra UI
+- Recoil
 - MySQL with Prisma (ORM)
-- React Query
+- SWR
 - React Hook Form
