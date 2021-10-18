@@ -1,0 +1,46 @@
+{
+  "name": "Blogify - Create and update blogs",
+  "short_name": "Blogify",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#7E22CE",
+  "description": "Blogify is an awesome blog app where users can create and update their blogs and like and comments on those blogs and they can also create and update their profiles",
+  "dir": "ltr",
+  "categories": "lifestyle,music,news,personalization,politics,social,sports",
+  "lang": "en",
+  "orientation": "portrait",
+  "scope": "/",
+  "theme_color": "#7E22CE",
+  "icons": [
+    {
+      "src": "/icons/icon_48x48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon_72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon_96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon_144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon_168x168.png",
+      "sizes": "168x168",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
