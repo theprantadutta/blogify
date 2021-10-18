@@ -142,6 +142,12 @@ const AllPosts: React.FC<AllPostsProps> = () => {
                   {post.content}
                 </Text>
                 <Flex justify="start" alignItems="center">
+                  <Text as="p" fontWeight="semibold">
+                    By{' '}
+                    <Text as="span" fontWeight="bold" marginRight={'1'}>
+                      {post?.user?.name}
+                    </Text>
+                  </Text>
                   <IconButton
                     bg="transparent"
                     _hover={{ bg: 'transparent' }}

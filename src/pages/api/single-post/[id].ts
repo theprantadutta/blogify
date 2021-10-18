@@ -26,6 +26,11 @@ export default handler()
         include: {
           // comments: true,
           likes: true,
+          user: {
+            select: {
+              name: true,
+            },
+          },
         },
       })
       return res.status(200).json(post)

@@ -173,6 +173,12 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
           {post.content}
         </Text>
         <Flex justify="start" alignItems="center">
+          <Text as="p" fontWeight="semibold">
+            By{' '}
+            <Text as="span" fontWeight="bold" marginRight={'1'}>
+              {post?.user?.name}
+            </Text>
+          </Text>
           <IconButton
             bg="transparent"
             _hover={{ bg: 'transparent' }}
@@ -237,7 +243,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
             {detectPluralOrSingular(comments?.length ?? 0, 'Comment')}
           </Text>
         </Flex>
-        <Text fontSize="2xl" ml="2" id="comments" as="h4" fontWeight="bold">
+        <Text fontSize="2xl" id="comments" as="h4" fontWeight="bold">
           Comments
         </Text>
         <form onSubmit={handleSubmit}>
@@ -245,11 +251,10 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
             <Input
               value={comment}
               onChange={handleChange}
-              ml="2"
               fontWeight="semibold"
               placeholder="Type Comment Here..."
             />
-            <PrimaryButton my="2" type="submit">
+            <PrimaryButton my="2" marginLeft="0" type="submit">
               Submit
             </PrimaryButton>
           </Box>
@@ -267,7 +272,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
                 }}
                 key={comment.id}
               >
-                <Box ml="2" my="5">
+                <Box my="5">
                   <Flex alignItems="center" gridGap="5" style={{ height: 50 }}>
                     <Image
                       src={`https://ui-avatars.com/api/?name=${comment.user.name}&background=random`}
@@ -279,9 +284,10 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
                       <Text my="0" fontWeight="bold">
                         {comment.content}
                       </Text>
-                      <Text my="0">
-                        <Text as="span" fontWeight="semibold">
-                          By {comment?.user?.name},{' '}
+                      <Text my="0" fontWeight="semibold">
+                        By{' '}
+                        <Text as="span" fontWeight={'bold'}>
+                          {comment?.user?.name},{' '}
                         </Text>
                         {dayjs(comment.createdAt).fromNow()}
                       </Text>
@@ -292,7 +298,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
             )
           })
         ) : (
-          <Text fontWeight="semibold" ml="2" my={2}>
+          <Text fontWeight="semibold" my={2}>
             No Comments Yet
           </Text>
         )}

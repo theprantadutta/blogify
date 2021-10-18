@@ -43,6 +43,11 @@ export default handler().get(async (req, res) => {
               userId: true,
             },
           },
+          user: {
+            select: {
+              name: true,
+            },
+          },
         },
       })
     } else {
@@ -60,6 +65,11 @@ export default handler().get(async (req, res) => {
           likes: {
             select: {
               userId: true,
+            },
+          },
+          user: {
+            select: {
+              name: true,
             },
           },
         },

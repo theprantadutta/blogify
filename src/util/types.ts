@@ -14,6 +14,7 @@ export type NavButtonLinks = {
 export interface ExtendedPost extends Post {
   comments: Comment[]
   likes: Like[]
+  user?: { name: string }
 }
 
 export interface PostsWithIsNext {
