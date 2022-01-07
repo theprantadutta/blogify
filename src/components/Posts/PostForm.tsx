@@ -16,6 +16,7 @@ import {
   fromTheLeftVariants,
   fromTheRightVariants
 } from '../../util/variants'
+import InputTextAreaField from '../FormFields/InputTextAreaField'
 import InputTextField from '../FormFields/InputTextField'
 import PrimaryButton from '../Shared/PrimaryButton'
 import ReactLoader from '../Shared/ReactLoader'
@@ -126,7 +127,7 @@ const PostForm: React.FC<PostFormProps> = ({
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <InputTextField
+                <InputTextAreaField
                   error={errors?.title?.message}
                   placeholder="Enter Title"
                   label="Enter Post Title"
