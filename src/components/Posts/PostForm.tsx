@@ -14,7 +14,7 @@ import { PostsWithIsNext } from '../../util/types'
 import {
   formVariants,
   fromTheLeftVariants,
-  fromTheRightVariants,
+  fromTheRightVariants
 } from '../../util/variants'
 import InputTextField from '../FormFields/InputTextField'
 import PrimaryButton from '../Shared/PrimaryButton'
@@ -36,7 +36,7 @@ const PostForm: React.FC<PostFormProps> = ({
   post,
   pageTitle,
   buttonName,
-  operation,
+  operation
 }) => {
   const toast = useToast()
   const router = useRouter()
@@ -47,22 +47,22 @@ const PostForm: React.FC<PostFormProps> = ({
     control,
     handleSubmit,
     setError,
-    formState: { errors },
+    formState: { errors }
   } = useForm<NewPostFormValues>({
     resolver: yupResolver(
       yup
         .object({
           title: yup.string().min(6).required(),
-          content: yup.string().min(6).required(),
+          content: yup.string().min(6).required()
         })
         .required()
     ),
     defaultValues: {
       title: post ? post.title : '',
-      content: post ? post.content : '',
+      content: post ? post.content : ''
     },
     mode: 'onSubmit',
-    reValidateMode: 'onBlur',
+    reValidateMode: 'onBlur'
   })
 
   const { data }: { data?: PostsWithIsNext } = useSWR<PostsWithIsNext, any>(
@@ -82,7 +82,7 @@ const PostForm: React.FC<PostFormProps> = ({
       '/posts?page=1',
       {
         ...data,
-        posts: [...data.posts, { upsertPostValues, id: Math.random() }],
+        posts: [...data.posts, { upsertPostValues, id: Math.random() }]
       },
       false
     )
@@ -90,14 +90,14 @@ const PostForm: React.FC<PostFormProps> = ({
     try {
       await axios.post(`/${operation}-post`, {
         ...upsertPostValues,
-        userId: auth.id,
+        userId: auth.id
       })
       toast({
         title: `Post ${operation}d successfully`,
         status: 'success',
         position: 'top-right',
         duration: 9000,
-        isClosable: true,
+        isClosable: true
       })
     } catch (e) {
       toast({
@@ -105,7 +105,7 @@ const PostForm: React.FC<PostFormProps> = ({
         status: 'error',
         position: 'top-right',
         duration: 9000,
-        isClosable: true,
+        isClosable: true
       })
     } finally {
       setSubmitting(false)
@@ -146,8 +146,8 @@ const PostForm: React.FC<PostFormProps> = ({
               render={({ field }) => (
                 <InputTextField
                   error={errors?.content?.message}
-                  label="New Password"
-                  placeholder="Enter New Password"
+                  label="Post Content"
+                  placeholder="Enter Post Content"
                   field={field}
                 />
               )}

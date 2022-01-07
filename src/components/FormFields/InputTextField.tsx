@@ -5,17 +5,16 @@ import {
   Input,
   InputGroup,
   InputLeftAddon,
-  InputProps,
+  InputProps
 } from '@chakra-ui/react'
 import type { NextPage } from 'next'
 import React, { ReactNode } from 'react'
-import { ControllerRenderProps, FieldValues } from 'react-hook-form'
 
 interface InputTextFieldProps extends InputProps {
   children?: ReactNode
   label: string
   error?: string
-  field: ControllerRenderProps<FieldValues, any>
+  field: any
   isLeftAddOn?: boolean
   isLeftAddOnValue?: string
 }
