@@ -127,7 +127,7 @@ const PostForm: React.FC<PostFormProps> = ({
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <InputTextAreaField
+                <InputTextField
                   error={errors?.title?.message}
                   placeholder="Enter Title"
                   label="Enter Post Title"
@@ -145,7 +145,7 @@ const PostForm: React.FC<PostFormProps> = ({
               control={control}
               defaultValue={''}
               render={({ field }) => (
-                <InputTextField
+                <InputTextAreaField
                   error={errors?.content?.message}
                   label="Post Content"
                   placeholder="Enter Post Content"

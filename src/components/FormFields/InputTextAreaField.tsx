@@ -2,10 +2,10 @@ import {
   FormControl,
   FormHelperText,
   FormLabel,
-  Input,
   InputGroup,
   InputLeftAddon,
-  InputProps
+  InputProps,
+  Textarea
 } from '@chakra-ui/react'
 import type { NextPage } from 'next'
 import React, { ReactNode } from 'react'
@@ -37,7 +37,7 @@ const InputTextAreaField: NextPage<InputTextAreaFieldProps> = ({
             {isLeftAddOnValue}
           </InputLeftAddon>
         )}
-        <Input
+        <Textarea
           // focusBorderColor={color}
           borderColor={color}
           fontWeight="semibold"
