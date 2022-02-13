@@ -8,7 +8,7 @@ import {
   Stack,
   Text,
   useDisclosure,
-  useToast,
+  useToast
 } from '@chakra-ui/react'
 import axios from 'axios'
 import dayjs from 'dayjs'
@@ -63,7 +63,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
         status: 'error',
         position: 'top-right',
         duration: 9000,
-        isClosable: true,
+        isClosable: true
       })
       return
     }
@@ -79,8 +79,8 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
       id: Math.floor(Math.random() * 100),
       createdAt: new Date(),
       user: {
-        name: auth?.name,
-      },
+        name: auth?.name
+      }
     }
     mutate(commentsUrl, [newComment, ...comments], false)
     await axios.post('/comments', newComment)
@@ -133,7 +133,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
                   '/posts?page=1',
                   {
                     ...data,
-                    posts: data.posts.filter((p) => p.id !== post.id),
+                    posts: data.posts.filter((p) => p.id !== post.id)
                   },
                   false
                 )
@@ -146,7 +146,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
                     status: 'success',
                     position: 'top-right',
                     duration: 9000,
-                    isClosable: true,
+                    isClosable: true
                   })
                 } catch (e) {
                   toast({
@@ -154,7 +154,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
                     status: 'error',
                     position: 'top-right',
                     duration: 9000,
-                    isClosable: true,
+                    isClosable: true
                   })
                 } finally {
                   mutate('/posts?page=1')
@@ -206,7 +206,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
                         return false
                       }
                       return true
-                    }),
+                    })
                   },
                   false
                 )
@@ -223,9 +223,9 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
                       {
                         id: Math.floor(Math.random() * 100),
                         userId: auth.id,
-                        postId: post.id,
-                      },
-                    ],
+                        postId: post.id
+                      }
+                    ]
                   },
                   false
                 )
@@ -243,6 +243,9 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
             {detectPluralOrSingular(comments?.length ?? 0, 'Comment')}
           </Text>
         </Flex>
+        <Text as="p">
+          Posted on {dayjs(post?.createdAt).format('D MMM, YYYY')}
+        </Text>
         <Text fontSize="2xl" id="comments" as="h4" fontWeight="bold">
           Comments
         </Text>
@@ -268,7 +271,7 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
                 transition={{
                   delay: 0.5 * index,
                   duration: 0.8,
-                  stiffness: 120,
+                  stiffness: 120
                 }}
                 key={comment.id}
               >

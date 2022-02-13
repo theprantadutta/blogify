@@ -21,7 +21,7 @@ import { NEXT_IRON_SESSION_CONFIG } from '../util/constants'
 import {
   fromTheBottomVariants,
   fromTheLeftVariants,
-  fromTheRightVariants,
+  fromTheRightVariants
 } from '../util/variants'
 
 interface RegisterProps {
@@ -41,7 +41,7 @@ const Register: React.FC<RegisterProps> = ({ user }) => {
     control,
     setError,
     handleSubmit,
-    formState: { errors },
+    formState: { errors }
   } = useForm<RegisterForm>({
     resolver: yupResolver(
       yup
@@ -55,8 +55,8 @@ const Register: React.FC<RegisterProps> = ({ user }) => {
               'Email already been taken',
               async function (value) {
                 try {
-                  await axios.post('/api/unique-email', {
-                    email: value,
+                  await axios.post('/unique-email', {
+                    email: value
                   })
                   return true
                 } catch (e) {
@@ -65,12 +65,12 @@ const Register: React.FC<RegisterProps> = ({ user }) => {
               }
             )
             .required(),
-          password: yup.string().min(6).required(),
+          password: yup.string().min(6).required()
         })
         .required()
     ),
     mode: 'onSubmit',
-    reValidateMode: 'onBlur',
+    reValidateMode: 'onBlur'
   })
   const [loading, setLoading] = useState<boolean>(false)
   const onSubmit = async (values: RegisterForm) => {
@@ -82,7 +82,7 @@ const Register: React.FC<RegisterProps> = ({ user }) => {
     } catch (e) {
       setError('name', {
         type: 'manual',
-        message: e?.response?.data?.error || `Something Went Wrong. Try Again`,
+        message: e?.response?.data?.error || `Something Went Wrong. Try Again`
       })
     } finally {
       setLoading(false)
@@ -174,14 +174,14 @@ export const getServerSideProps: GetServerSideProps = withIronSession(
       return {
         redirect: {
           permanent: false,
-          destination: '/',
+          destination: '/'
         },
-        props: {},
+        props: {}
       }
     }
 
     return {
-      props: {},
+      props: {}
     }
   },
   NEXT_IRON_SESSION_CONFIG

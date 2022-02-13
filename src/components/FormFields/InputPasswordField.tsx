@@ -6,17 +6,16 @@ import {
   Input,
   InputGroup,
   InputProps,
-  InputRightElement,
+  InputRightElement
 } from '@chakra-ui/react'
 import type { NextPage } from 'next'
 import React, { ReactNode } from 'react'
-import { ControllerRenderProps, FieldValues } from 'react-hook-form'
 
 interface InputPasswordFieldProps extends InputProps {
   children?: ReactNode
   label: string
   error?: string
-  field: ControllerRenderProps<FieldValues, any>
+  field: any
 }
 
 const InputPasswordField: NextPage<InputPasswordFieldProps> = ({
