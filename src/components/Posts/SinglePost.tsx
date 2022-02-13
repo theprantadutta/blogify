@@ -40,7 +40,10 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
   const ownership = auth?.id === post.userId
 
   const url = '/single-post/' + post.id
+
+  // this state saves whether the post is liked or not
   const [isLiked, setIsLiked] = useState(false)
+
   useEffect(() => {
     for (let i = 0; i < post?.likes.length; i++) {
       if (post?.likes[i]?.userId === auth?.id) {
@@ -50,8 +53,12 @@ const SinglePost: React.FC<SinglePostProps> = ({ post }) => {
     }
   }, [auth?.id, isLiked, post?.likes])
 
+  // generate a random url for the user
+  // who posted a comment
   const commentsUrl = `/comments?postId=${post?.id}`
   const { data: comments } = useSWR(commentsUrl)
+
+  // controlling comment field
   const [comment, setComment] = useState('')
   const handleChange = (event) => setComment(event.target.value)
 

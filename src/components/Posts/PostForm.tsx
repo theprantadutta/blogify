@@ -47,7 +47,6 @@ const PostForm: React.FC<PostFormProps> = ({
   const {
     control,
     handleSubmit,
-    setError,
     formState: { errors }
   } = useForm<NewPostFormValues>({
     resolver: yupResolver(
@@ -69,6 +68,9 @@ const PostForm: React.FC<PostFormProps> = ({
   const { data }: { data?: PostsWithIsNext } = useSWR<PostsWithIsNext, any>(
     '/posts?page=1'
   )
+
+  // we need to call the global mutate function
+  // here for reasons I don't know, lol
   const { mutate } = useSWRConfig()
 
   const onSubmit = async (values: NewPostFormValues) => {
@@ -87,6 +89,9 @@ const PostForm: React.FC<PostFormProps> = ({
       },
       false
     )
+    // the following line is actually an await operation
+    // but we didn't use await because we wanted the UI
+    // to be fast
     router.push('/posts')
     try {
       await axios.post(`/${operation}-post`, {
