@@ -61,9 +61,14 @@ export default handler()
         where: {
           id,
         },
+        include: {
+          likes: true,
+          comments: true
+        }
       })
       return res.status(200).json(post)
     } catch (e) {
+      console.log(e)
       return res.status(422).json({
         error: 'Something Went Wrong',
       })

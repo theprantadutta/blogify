@@ -29,7 +29,7 @@ model Post {
   content   String    @db.LongText
   createdAt DateTime  @default(now()) @db.Timestamp(6)
   userId    Int
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   comments  Comment[]
   likes     Like[]
 }
@@ -38,16 +38,16 @@ model Like {
   id     Int  @id @default(autoincrement())
   userId Int
   postId Int
-  user   User @relation(fields: [userId], references: [id])
-  post   Post @relation(fields: [postId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model Comment {
-  id      Int    @id @default(autoincrement())
-  content String @db.VarChar(255)
-  userId  Int
-  postId  Int
-  user    User   @relation(fields: [userId], references: [id])
-  post    Post   @relation(fields: [postId], references: [id])
-  createdAt DateTime  @default(now()) @db.Timestamp(6) 
+  id        Int      @id @default(autoincrement())
+  content   String   @db.VarChar(255)
+  userId    Int
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
 }
